@@ -19,7 +19,7 @@ class Database:
             port=env.int('MYSQL_PORT'),
             user=env.str('MYSQL_USER'),
             password=env.str('MYSQL_PASSWORD'),
-            db=env.str('MYSQL_DATABASE'),
+            db=env.str('MYSQL_NAME'),
             autocommit=True
         )
 
@@ -38,3 +38,16 @@ class Database:
                     return None
 
 
+    async def add_product(self, group_name, group_description, group_price,
+                          group_url,group_status,group_video):
+        query = """
+            INSERT INTO products(title, description, video_url, group_url, price, is_active, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+        await self.execute(query,
+                           (
+                               group_name, group_description, group_video,
+                               group_url, group_price, group_status,
+                               datetime.now().date(), datetime.now()
+                           )
+                    )

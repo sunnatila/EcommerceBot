@@ -1,7 +1,19 @@
 from aiogram import types
-from aiogram.filters import CommandStart
-
+from aiogram.filters import CommandStart, BaseFilter
+from data.config import ADMINS
+from keyboards.default import admin_button
 from loader import dp
+
+
+class AdminFilter(BaseFilter):
+    async def __call__(self, msg: types.Message,  *args, **kwargs):
+        return str(msg.from_user.id) in ADMINS
+
+
+@dp.message(AdminFilter(), CommandStart())
+async def bot_start(message: types.Message):
+    await message.answer(f"Assalomu Alaykum.\n"
+                         f"Admin panelga xush kelibsiz!", reply_markup=admin_button)
 
 
 @dp.message(CommandStart())
