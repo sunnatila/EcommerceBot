@@ -51,3 +51,40 @@ class Database:
                                datetime.now().date(), datetime.now()
                            )
                     )
+
+    async def update_product(self, product_id, group_name, group_description, group_price,
+                          group_url,group_status,group_video):
+        query = """
+            UPDATE products
+            SET title=%s, description=%s, video_url=%s, group_url=%s, price=%s, is_active=%s, updated_at=%s
+            WHERE id=%s
+            """
+        await self.execute(query,
+                           (
+                               group_name, group_description, group_video,
+                               group_url, group_price, group_status,
+                               datetime.now(), product_id
+                           )
+                    )
+
+    async def get_products(self):
+        query = """
+            SELECT id, title FROM products
+        """
+
+        return await self.execute(query=query, fetchall=True)
+
+
+    async def get_product(self, product_id):
+        query = """
+            SELECT * FROM products WHERE id=%s
+        """
+        return await self.execute(query, (product_id, ), fetchone=True)
+
+
+    async def delete_product(self, product_id):
+        query = """
+            DELETE FROM products WHERE id=%s
+        """
+
+        await self.execute(query, (product_id, ))
