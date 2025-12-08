@@ -88,3 +88,27 @@ class Database:
         """
 
         await self.execute(query, (product_id, ))
+
+
+    # User functions ---------------------------------------------------------------------------
+
+
+    async def add_user(self, fullname, phone_number, tg_id):
+        query = """
+            INSERT INTO users(fullname, phone_number, tg_id, created_at)
+            VALUES (%s, %s, %s, %s)
+        """
+        await self.execute(query,
+                           (
+                            fullname, phone_number,
+                            tg_id, datetime.now().date()
+                            )
+                        )
+
+
+    async def get_user_by_tg_id(self, tg_id):
+        query = """
+            SELECT id, fullname FROM users WHERE tg_id=%s
+        """
+
+        return await self.execute(query, (tg_id, ), fetchone=True)
