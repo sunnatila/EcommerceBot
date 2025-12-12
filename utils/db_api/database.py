@@ -82,6 +82,14 @@ class Database:
         return await self.execute(query, (product_id, ), fetchone=True)
 
 
+    async def get_active_products(self):
+        query = """
+            SELECT id, title FROM products WHERE is_active='active'
+        """
+
+        return await self.execute(query, fetchall=True)
+
+
     async def delete_product(self, product_id):
         query = """
             DELETE FROM products WHERE id=%s
@@ -112,3 +120,27 @@ class Database:
         """
 
         return await self.execute(query, (tg_id, ), fetchone=True)
+
+
+
+    async def add_order(self, user_id, product_id, paid_status):
+        query = """
+            INSERT INTO orders(user_id, product_id, is_paid, created_at)
+            VALUES(%s, %s, %s, %s)
+        """
+
+        await self.execute(query, (user_id, product_id, paid_status, datetime.now().date()))
+
+
+    async def get_user_paid_orders(self, user_id):
+        query = """
+            SELECT p.id, p.title
+            FROM products p
+            JOIN orders o ON p.id = o.product_id
+            WHERE o.user_id = %s
+              AND o.is_paid = 'is_paid';
+        """
+        return await self.execute(query, (user_id,), fetchall=True)
+
+
+

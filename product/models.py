@@ -25,14 +25,14 @@ class Product(models.Model):
 
 
 ORDER_STATUS = (
-    ("To'landi", 'Is paid'),
-    ("To'lanmadi", "Is not paid")
+    ("is_paid", 'To\'landi'),
+    ("is_not_paid", "To'lanmadi")
 )
 
 class Order(models.Model):
-    user_id = models.ForeignKey(to='user.User', on_delete=models.CASCADE)
-    product_id = models.ForeignKey(to=Product, on_delete=models.CASCADE)
-    is_paid = models.BooleanField(choices=ORDER_STATUS, default="Is not paid")
+    user = models.ForeignKey(to='user.User', on_delete=models.CASCADE)
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+    is_paid = models.CharField(max_length=20, choices=ORDER_STATUS, default="is_not_paid")
     created_at = models.DateField(auto_now=True)
 
     def __str__(self):
