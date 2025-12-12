@@ -28,6 +28,11 @@ async def get_product_id(call: CallbackQuery, state: FSMContext):
     product_id = call.data
     await call.message.delete()
     await state.update_data({"product_id": product_id})
+    user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
+    if await db.get_user_order(user_id, product_id):
+        await call.message.answer("Siz bu mahsulotni allaqachon sotib olgansiz!", reply_markup=user_buttons)
+        await state.clear()
+        return
     data = await db.get_product(product_id)
     video = data[-1]
     info = f"👥 <b>Guruhning nomi:</b> {data[1]}\n\n"

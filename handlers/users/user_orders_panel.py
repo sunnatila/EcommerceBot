@@ -23,6 +23,7 @@ async def back_func(call: CallbackQuery, state: FSMContext):
 
 @dp.callback_query(StateFilter("get_order_id"), lambda call: call.data.isdigit())
 async def send_order_info(call: CallbackQuery, state: FSMContext):
+    await call.message.delete()
     data = await db.get_product(call.data)
     video = data[-1]
     info = (
@@ -43,7 +44,7 @@ async def send_order_info(call: CallbackQuery, state: FSMContext):
 @dp.callback_query(StateFilter("order_info"), lambda call: call.data == 'back')
 async def back_to_orders_list_func(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-    user_id = (await db.get_user_by_tg_id(call.message.from_user.id))[0]
+    user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
     await call.message.answer("Kormohchi bo'lgan mahsulotingizni tanlang:", reply_markup=await user_orders(user_id))
     await state.set_state("get_order_id")
 

@@ -143,4 +143,12 @@ class Database:
         return await self.execute(query, (user_id,), fetchall=True)
 
 
+    async def get_user_order(self, user_id, order_id):
+        query = """
+            SELECT * FROM orders 
+            WHERE user_id=%s
+            AND product_id=%s
+        """
+
+        return await self.execute(query, (user_id, order_id), fetchone=True)
 
