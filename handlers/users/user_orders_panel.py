@@ -7,10 +7,10 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 
-@dp.message(lambda msg: msg.text == "🛒 Mening mahsulotlarim")
+@dp.message(lambda msg: msg.text == "🎞️ Mening videolarim")
 async def send_user_products(msg: Message, state: FSMContext):
     user_id = (await db.get_user_by_tg_id(msg.from_user.id))[0]
-    await msg.answer("Kormohchi bo'lgan mahsulotingizni tanlang: ", reply_markup=await user_orders(user_id))
+    await msg.answer("Kormohchi bo'lgan guruhingizni tanlang: ", reply_markup=await user_orders(user_id))
     await state.set_state("get_order_id")
 
 
@@ -29,14 +29,13 @@ async def send_order_info(call: CallbackQuery, state: FSMContext):
     info = (
         f"👥 <b>Guruhning nomi:</b> {data[1]}\n\n"
         f"📝 <b>Guruhning ma'lumoti:</b> {data[2]}\n\n"
-        f"🔗 <b>Guruhga qo'shilish:</b> <a href='{data[3]}'>Havola</a>\n"
     )
 
     await call.message.answer_video(
         video=video,
         caption=info,
         parse_mode='HTML',
-        reply_markup=back_button
+        reply_markup=await back_button(data[3])
     )
     await state.set_state("order_info")
 
@@ -45,7 +44,7 @@ async def send_order_info(call: CallbackQuery, state: FSMContext):
 async def back_to_orders_list_func(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
     user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
-    await call.message.answer("Kormohchi bo'lgan mahsulotingizni tanlang:", reply_markup=await user_orders(user_id))
+    await call.message.answer("Kormohchi bo'lgan guruhingizni tanlang:", reply_markup=await user_orders(user_id))
     await state.set_state("get_order_id")
 
 

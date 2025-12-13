@@ -11,9 +11,9 @@ from aiogram.fsm.context import FSMContext
 from states import ProductStates
 
 
-@dp.message(lambda msg: msg.text == "📦 Mahsulotlar bo'limi")
+@dp.message(lambda msg: msg.text == "🎥 Videolar bo'limi")
 async def send_products(msg: Message, state: FSMContext):
-    await msg.answer("Sotib olmohchi bo'lgan mahsulotni tanlang:", reply_markup=await get_active_products())
+    await msg.answer("Sotib olmohchi bo'lgan guruhni tanlang:", reply_markup=await get_active_products())
     await state.set_state(ProductStates.products_page)
 
 @dp.callback_query(ProductStates.products_page, lambda call: call.data == 'back')
@@ -30,7 +30,7 @@ async def get_product_id(call: CallbackQuery, state: FSMContext):
     await state.update_data({"product_id": product_id})
     user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
     if await db.get_user_order(user_id, product_id):
-        await call.message.answer("Siz bu mahsulotni allaqachon sotib olgansiz!", reply_markup=user_buttons)
+        await call.message.answer("Siz bu guruhni allaqachon sotib olgansiz!", reply_markup=user_buttons)
         await state.clear()
         return
     data = await db.get_product(product_id)
@@ -82,7 +82,7 @@ async def pre_checkout_query(pre_checkout_q: PreCheckoutQuery):
 @dp.message(lambda msg: msg.content_type in [ContentType.SUCCESSFUL_PAYMENT])
 async def successful_payment(message: Message, state: FSMContext):
     await message.answer("To'lov muvaffaqiyatli amalga oshirildi!\n"
-                         "Mahsulotlaringizni 'Mening mahsulotlarim' bo'limida korishingiz mumkin.", reply_markup=user_buttons)
+                         "Videolaringizni 'Mening videolarim' bo'limida korishingiz mumkin.", reply_markup=user_buttons)
 
     data = await state.get_data()
     user_id = (await db.get_user_by_tg_id(message.from_user.id))[0]

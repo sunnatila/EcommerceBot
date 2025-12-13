@@ -43,10 +43,13 @@ async def user_orders(user_id):
     return orders_button.adjust(2).as_markup()
 
 
-back_button = InlineKeyboardBuilder(
-    markup=[
-        [
-            InlineKeyboardButton(text="🔙 Ortga", callback_data="back")
+async def back_button(link):
+    button = InlineKeyboardBuilder(
+        markup=[
+            [
+                InlineKeyboardButton(text="Guruhga qo'shilish", url=link),
+                InlineKeyboardButton(text="🔙 Ortga", callback_data="back")
+            ]
         ]
-    ]
-).adjust(2).as_markup()
+    ).adjust(1).as_markup()
+    return button

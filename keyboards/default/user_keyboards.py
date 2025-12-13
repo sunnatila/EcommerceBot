@@ -4,8 +4,9 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, KeyboardButton
 user_buttons = ReplyKeyboardBuilder(
     markup=[
         [
-            KeyboardButton(text="📦 Mahsulotlar bo'limi"),
-            KeyboardButton(text="🛒 Mening mahsulotlarim")
+            KeyboardButton(text="🎥 Videolar bo'limi"),
+            KeyboardButton(text="🎞️ Mening videolarim")
+
         ]
     ]
 ).adjust(2).as_markup(resize_keyboard=True, one_time_keyboard=True)
