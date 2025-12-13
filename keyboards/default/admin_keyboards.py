@@ -15,7 +15,7 @@ admin_group_buttons = ReplyKeyboardBuilder(
         [
             KeyboardButton(text="📋 Guruh qo'shish"),
             KeyboardButton(text="📋 Guruhlar ro'yxati"),
-            KeyboardButton(text="🔙 Qaytish")
+            KeyboardButton(text="🔙 Ortga")
         ]
     ]
 ).adjust(2).as_markup(resize_keyboard=True, one_time_keyboard=True)

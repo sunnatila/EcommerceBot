@@ -8,7 +8,7 @@ async def get_active_products():
     for product in products:
         data.add(InlineKeyboardButton(text=f"{product[1]}", callback_data=f"{product[0]}"))
 
-    data.add(InlineKeyboardButton(text="🔙 Qaytish", callback_data="back"))
+    data.add(InlineKeyboardButton(text="🔙 Ortga", callback_data="back"))
     return data.adjust(3).as_markup()
 
 
@@ -16,7 +16,7 @@ user_product_buttons = InlineKeyboardBuilder(
     markup=[
         [
             InlineKeyboardButton(text="🛒 Sotib olish", callback_data="product_buy"),
-            InlineKeyboardButton(text="🔙 Qaytish", callback_data="back"),
+            InlineKeyboardButton(text="🔙 Ortga", callback_data="back"),
         ]
     ]
 ).adjust(2).as_markup()
@@ -38,7 +38,7 @@ async def user_orders(user_id):
     if user_paid_orders:
         for order in user_paid_orders:
             orders_button.add(InlineKeyboardButton(text=f"{order[1]}", callback_data=f"{order[0]}"))
-    orders_button.add(InlineKeyboardButton(text="🔙 Qaytish", callback_data="back"))
+    orders_button.add(InlineKeyboardButton(text="🔙 Ortga", callback_data="back"))
 
     return orders_button.adjust(2).as_markup()
 
@@ -46,7 +46,7 @@ async def user_orders(user_id):
 back_button = InlineKeyboardBuilder(
     markup=[
         [
-            InlineKeyboardButton(text="🔙 Qaytish", callback_data="back")
+            InlineKeyboardButton(text="🔙 Ortga", callback_data="back")
         ]
     ]
 ).adjust(2).as_markup()
