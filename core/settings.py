@@ -21,7 +21,8 @@ SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
-
+CSRF_TRUSTED_ORIGINS=env.list('CSRF_TRUSTED_ORIGINS')
+CORS_ALLOWED_ORIGINS=env.list('CORS_ALLOWED_ORIGINS')
 
 # Application definition
 
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "corsheaders",
 
     'product',
     'user',
@@ -42,6 +44,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -54,7 +57,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
