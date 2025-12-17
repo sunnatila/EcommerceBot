@@ -14,9 +14,10 @@ class AdminFilter(BaseFilter):
 
 @dp.message(AdminFilter(), CommandStart())
 async def bot_start(message: types.Message, state: FSMContext):
+    await state.clear()
     await message.answer(f"Assalomu Alaykum.\n"
                          f"Admin panelga xush kelibsiz!", reply_markup=admin_button)
-    await state.clear()
+
 
 
 @dp.message(CommandStart())
