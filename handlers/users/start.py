@@ -13,7 +13,7 @@ class AdminFilter(BaseFilter):
 
 
 @dp.message(AdminFilter(), CommandStart())
-async def bot_start(message: types.Message, state: FSMContext):
+async def admin_start(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer(f"Assalomu Alaykum.\n"
                          f"Admin panelga xush kelibsiz!", reply_markup=admin_button)
@@ -21,7 +21,7 @@ async def bot_start(message: types.Message, state: FSMContext):
 
 
 @dp.message(CommandStart())
-async def bot_start(message: types.Message, state: FSMContext):
+async def user_start(message: types.Message, state: FSMContext):
     data = await db.get_user_by_tg_id(message.from_user.id)
     if data:
         await message.answer(f"Bosh sahifa.", reply_markup=user_buttons)

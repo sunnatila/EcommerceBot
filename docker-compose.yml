@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: dockerfiles/django/Dockerfile
+      dockerfile: dockerfiles/Dockerfile
     container_name: univer_see_app
     restart: always
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
@@ -29,6 +29,8 @@ services:
       - envs/.env
     volumes:
       - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
       interval: 30s
@@ -38,13 +40,12 @@ services:
     networks:
       - univer_see_network
 
-
-  japan_bot:
+  bot:
     build:
       context: .
-      dockerfile: ./dockerfiles/django/Dockerfile
+      dockerfile: dockerfiles/Dockerfile
     image: univer_see_bot
-    command: python bot/app.py
+    command: python app.py
     volumes:
       - .:/app
     env_file:

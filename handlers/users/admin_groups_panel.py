@@ -18,6 +18,13 @@ async def group_panel(msg: types.Message):
     await msg.answer("Guruhlar bo'limida kerak bo'lgan tugmachani bo'sing.", reply_markup=admin_group_buttons)
 
 
+@dp.message(AdminFilter(), lambda msg: msg.text == "🔙 Ortga")
+async def admin_panel(msg: types.Message, state: FSMContext):
+    await msg.answer("Bosh panel.", reply_markup=admin_button)
+    await state.clear()
+
+
+
 # Create Group panel --------------------------------------------------------------------------------------
 
 
@@ -115,9 +122,7 @@ async def group_save(call: CallbackQuery, state: FSMContext):
         await state.clear()
 
 
-@dp.message(AdminFilter(), lambda msg: msg.text == "🔙 Ortga")
-async def admin_panel(msg: types.Message):
-    await msg.answer("Bosh panel.", reply_markup=admin_button)
+
 
 
 # Show Groups panel --------------------------------------------------------------------------------------
