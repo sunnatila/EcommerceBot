@@ -18,6 +18,12 @@ async def group_panel(msg: types.Message):
     await msg.answer("Guruhlar bo'limida kerak bo'lgan tugmachani bo'sing.", reply_markup=admin_group_buttons)
 
 
+@dp.message(AdminFilter(), lambda msg: msg.text == "🔙 Ortga")
+async def admin_panel(msg: types.Message, state: FSMContext):
+    await msg.answer("Bosh panel.", reply_markup=admin_button)
+    await state.clear()
+
+
 # Create Group panel --------------------------------------------------------------------------------------
 
 
@@ -32,21 +38,21 @@ async def add_group(msg: Union[types.Message, CallbackQuery], state: FSMContext,
     await state.set_state(GroupStates.group_name)
 
 
-@dp.message(AdminFilter(), GroupStates.group_name, lambda msg: msg.content_type in [ContentType.TEXT])
+@dp.message(AdminFilter(), StateFilter(GroupStates.group_name), lambda msg: msg.content_type in [ContentType.TEXT])
 async def get_group_name(msg: types.Message, state: FSMContext):
     await state.update_data({"group_name": msg.text})
     await msg.answer("Guruh haqida ma'lumot kiriting:")
     await state.set_state(GroupStates.group_description)
 
 
-@dp.message(AdminFilter(), GroupStates.group_description, lambda msg: msg.content_type in [ContentType.TEXT])
+@dp.message(AdminFilter(), StateFilter(GroupStates.group_description), lambda msg: msg.content_type in [ContentType.TEXT])
 async def get_group_description(msg: types.Message, state: FSMContext):
     await state.update_data({"group_description": msg.text})
     await msg.answer("Guruh narxini kiriting (so'mda): ")
     await state.set_state(GroupStates.group_price)
 
 
-@dp.message(AdminFilter(), GroupStates.group_price)
+@dp.message(AdminFilter(), StateFilter(GroupStates.group_price))
 async def get_group_price(msg: types.Message, state: FSMContext):
     price = msg.text
     if price.isdigit():
@@ -57,21 +63,21 @@ async def get_group_price(msg: types.Message, state: FSMContext):
     await msg.answer("Guruh narxini faqat raqamlarda kiring!!\n"
                      "Misol uchun: 25000")
 
-@dp.message(AdminFilter(), GroupStates.group_url, lambda msg: msg.content_type in [ContentType.TEXT])
+@dp.message(AdminFilter(), StateFilter(GroupStates.group_url), lambda msg: msg.content_type in [ContentType.TEXT])
 async def get_group_url(msg: types.Message, state: FSMContext):
     await state.update_data({"group_url": msg.text})
     await msg.answer("Guruh aktivmi?", reply_markup=group_active_button)
     await state.set_state(GroupStates.group_status)
 
 
-@dp.callback_query(AdminFilter(), GroupStates.group_status)
+@dp.callback_query(AdminFilter(), StateFilter(GroupStates.group_status))
 async def get_group_status(call: CallbackQuery, state: FSMContext):
     await state.update_data({"group_status": call.data})
     await call.message.delete()
     await call.message.answer("Guruh haqida video tashlang:")
     await state.set_state(GroupStates.group_video)
 
-@dp.message(AdminFilter(), GroupStates.group_video, lambda msg: msg.content_type in [ContentType.VIDEO])
+@dp.message(AdminFilter(), StateFilter(GroupStates.group_video), lambda msg: msg.content_type in [ContentType.VIDEO])
 async def get_group_image(msg: types.Message, state: FSMContext):
     video = msg.video.file_id
     await state.update_data({"group_video": video})
@@ -86,7 +92,7 @@ async def get_group_image(msg: types.Message, state: FSMContext):
     await msg.answer_video(video=video, caption=info, reply_markup=admin_group_save_buttons)
     await state.set_state(GroupStates.group_save)
 
-@dp.callback_query(AdminFilter(), GroupStates.group_save)
+@dp.callback_query(AdminFilter(), StateFilter(GroupStates.group_save))
 async def group_save(call: CallbackQuery, state: FSMContext):
     if call.data == "save":
         await call.message.delete()
@@ -115,9 +121,6 @@ async def group_save(call: CallbackQuery, state: FSMContext):
         await state.clear()
 
 
-@dp.message(AdminFilter(), lambda msg: msg.text == "🔙 Ortga")
-async def admin_panel(msg: types.Message):
-    await msg.answer("Bosh panel.", reply_markup=admin_button)
 
 
 # Show Groups panel --------------------------------------------------------------------------------------
