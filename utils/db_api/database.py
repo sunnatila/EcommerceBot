@@ -19,7 +19,7 @@ class Database:
             port=env.int('MYSQL_PORT'),
             user=env.str('MYSQL_USER'),
             password=env.str('MYSQL_PASSWORD'),
-            db=env.str('MYSQL_NAME'),
+            db=env.str('MYSQL_DATABASE'),
             autocommit=True
         )
 
