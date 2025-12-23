@@ -152,3 +152,46 @@ class Database:
 
         return await self.execute(query, (user_id, order_id), fetchone=True)
 
+
+    # Admins panel ---------------------------------------------------------------
+
+    async def get_admins(self):
+        query = """
+            SELECT * FROM admin_users
+        """
+
+        return await self.execute(query, fetchall=True)
+
+    async def add_admin(self,username):
+        query = """
+            INSERT INTO admin_users(username) 
+            VALUES(%s)
+        """
+
+        await self.execute(query,(username,))
+
+
+    async def get_admin_by_id(self, admin_id):
+        query = """
+            SELECT * FROM admin_users WHERE id=%s
+        """
+
+        return await self.execute(query, (admin_id,), fetchone=True)
+
+
+    async def update_admin_info(self, admin_id, username):
+        query = """
+            UPDATE admin_users
+            SET username=%s
+            WHERE id=%s
+        """
+
+        await self.execute(query, (username, admin_id))
+
+
+    async def delete_admin(self, admin_id):
+        query = """
+                    DELETE FROM admin_users WHERE id=%s
+                """
+
+        await self.execute(query, (admin_id,))

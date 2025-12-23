@@ -164,9 +164,9 @@ async def update_group(call: CallbackQuery, state: FSMContext):
         await add_group(call, state, pr_id=data.get("product_id"))
     elif call.data == "delete":
         await db.delete_product(data.get("product_id"))
-        await call.message.answer("Guruh muvaffaqiyatli tarzda ochirildi.", reply_markup=admin_group_buttons)
+        await call.message.answer("Guruh muvaffaqiyatli tarzda o'chirildi.", reply_markup=admin_group_buttons)
         await state.clear()
     elif call.data == "back":
-        await call.message.answer("Qaysi guruhni ma'lumotini kormohchisiz?", reply_markup=await get_product_list())
+        await call.message.answer("Qaysi guruhni ma'lumotini ko'rmoqchisiz?", reply_markup=await get_product_list())
         await state.set_state("get_group_id")
 

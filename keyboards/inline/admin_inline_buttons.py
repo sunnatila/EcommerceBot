@@ -45,3 +45,24 @@ group_settings_button = InlineKeyboardBuilder(
     ]
 ).adjust(2).as_markup()
 
+
+async def send_admins_buttons():
+    admins = await db.get_admins()
+    admin_buttons = InlineKeyboardBuilder()
+    for admin in admins:
+        admin_buttons.add(InlineKeyboardButton(text=f"{admin[1]}", callback_data=f"{admin[0]}"))
+
+    admin_buttons.add(InlineKeyboardButton(text="🔙 Ortga", callback_data="back"))
+
+    return admin_buttons.adjust(1).as_markup()
+
+
+admin_settings_button = InlineKeyboardBuilder(
+    markup=[
+        [
+            InlineKeyboardButton(text="✏️Tahrirlash", callback_data="edit"),
+            InlineKeyboardButton(text="🗑️ O'chirish", callback_data="delete"),
+            InlineKeyboardButton(text="🔙 Ortga", callback_data="back"),
+        ]
+    ]
+).adjust(2).as_markup()
