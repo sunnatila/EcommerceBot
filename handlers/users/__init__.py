@@ -4,5 +4,7 @@ from . import admin_groups_panel
 from . import admin_create_panel
 from . import user_payment_panel
 from . import user_orders_panel
+from . import user_admin_contact_panel
+from . import user_bonus_films_panel
 from . import register
 from . import echo

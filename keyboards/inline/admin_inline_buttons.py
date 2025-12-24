@@ -66,3 +66,13 @@ admin_settings_button = InlineKeyboardBuilder(
         ]
     ]
 ).adjust(2).as_markup()
+
+
+product_paid_button = InlineKeyboardBuilder(
+    markup=[
+        [
+            InlineKeyboardButton(text="Bepul", callback_data="free"),
+            InlineKeyboardButton(text="Pullik", callback_data="paid"),
+        ]
+    ]
+).adjust(2).as_markup()

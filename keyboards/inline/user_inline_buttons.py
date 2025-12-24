@@ -53,3 +53,15 @@ async def back_button(link):
         ]
     ).adjust(1).as_markup()
     return button
+
+
+async def get_free_films():
+    data = await db.get_free_products()
+    films = InlineKeyboardBuilder()
+    if data:
+        for film in data:
+            films.add(InlineKeyboardButton(text=f"{film[1]}", callback_data=f"{film[0]}"))
+
+    films.add(InlineKeyboardButton(text="🔙 Ortga", callback_data="back"))
+    return films.adjust(2).as_markup()
+

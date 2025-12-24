@@ -5,8 +5,9 @@ user_buttons = ReplyKeyboardBuilder(
     markup=[
         [
             KeyboardButton(text="🎬 Filmlar bo'limi"),
-            KeyboardButton(text="🎞 Mening Filmlarim")
-
+            KeyboardButton(text="🎞 Mening Filmlarim"),
+            KeyboardButton(text="🎥 Bonus filmlar"),
+            KeyboardButton(text="👤 Admin bilan bog'lanish"),
         ]
     ]
 ).adjust(2).as_markup(resize_keyboard=True, one_time_keyboard=True)

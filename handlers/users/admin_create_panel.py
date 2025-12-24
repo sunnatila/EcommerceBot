@@ -60,7 +60,6 @@ async def back_func(call: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-
 @dp.callback_query(StateFilter("get_admin_id"), lambda call: call.data.isdigit())
 async def back_func(call: CallbackQuery, state: FSMContext):
     admin_id = call.data[0]

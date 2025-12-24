@@ -67,6 +67,15 @@ class Database:
                            )
                     )
 
+
+    async def get_free_products(self):
+        query = """
+            SELECT id, title FROM products WHERE price=0 AND is_active='active'
+        """
+
+        return await self.execute(query, fetchall=True)
+
+
     async def get_products(self):
         query = """
             SELECT id, title FROM products
