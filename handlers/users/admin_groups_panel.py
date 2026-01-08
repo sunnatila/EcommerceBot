@@ -116,6 +116,7 @@ async def get_group_image(msg: types.Message, state: FSMContext):
     await msg.answer_video(video=video, caption=info, reply_markup=admin_group_save_buttons)
     await state.set_state(GroupStates.group_save)
 
+
 @dp.callback_query(AdminFilter(), StateFilter(GroupStates.group_save))
 async def group_save(call: CallbackQuery, state: FSMContext):
     if call.data == "save":

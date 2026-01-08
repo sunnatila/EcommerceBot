@@ -76,3 +76,15 @@ product_paid_button = InlineKeyboardBuilder(
         ]
     ]
 ).adjust(2).as_markup()
+
+
+get_users_panel_buttons = InlineKeyboardBuilder(
+    markup=[
+        [
+            InlineKeyboardButton(text="👤 Foydalanuvchi qo'shish", callback_data="add_user"),
+            InlineKeyboardButton(text="👤 Foydalanuvchilar ro'yxati", callback_data="users_list"),
+            InlineKeyboardButton(text="🔙 Ortga", callback_data="back"),
+        ]
+    ]
+).adjust(2).as_markup()
+

@@ -91,9 +91,15 @@ class Database:
         return await self.execute(query, (product_id, ), fetchone=True)
 
 
+    async def get_product_by_name(self, pr_name):
+        query = """
+            SELECT * FROM products WHERE title=%s
+        """
+        return await self.execute(query, (pr_name, ), fetchone=True)
+
     async def get_active_products(self):
         query = """
-            SELECT id, title FROM products WHERE is_active='active'
+            SELECT id, title FROM products WHERE is_active='active' AND price>0
         """
 
         return await self.execute(query, fetchall=True)

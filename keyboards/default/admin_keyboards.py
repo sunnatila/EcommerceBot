@@ -5,6 +5,7 @@ admin_button = ReplyKeyboardBuilder(
         [
             KeyboardButton(text="📋 Guruhlar bo'limi"),
             KeyboardButton(text="👤 Adminlar bo'limi"),
+            KeyboardButton(text="👤 Foydalanuvchilar bo'limi"),
         ]
     ]
 ).adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)

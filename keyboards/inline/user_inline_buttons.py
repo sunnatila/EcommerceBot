@@ -1,21 +1,11 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 from loader import db
 
-
-async def get_active_products():
-    products = await db.get_active_products()
-    data = InlineKeyboardBuilder()
-    for product in products:
-        data.add(InlineKeyboardButton(text=f"{product[1]}", callback_data=f"{product[0]}"))
-
-    data.add(InlineKeyboardButton(text="🔙 Ortga", callback_data="back"))
-    return data.adjust(3).as_markup()
-
-
 user_product_buttons = InlineKeyboardBuilder(
     markup=[
         [
-            InlineKeyboardButton(text="🛒 Sotib olish", callback_data="product_buy"),
+            InlineKeyboardButton(text="Sotib olish", callback_data="product_buy"),
+            InlineKeyboardButton(text="Yaqinimga sovg'a qilish 🎁", callback_data="present_product"),
             InlineKeyboardButton(text="🔙 Ortga", callback_data="back"),
         ]
     ]

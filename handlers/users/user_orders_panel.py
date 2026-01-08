@@ -10,7 +10,7 @@ from aiogram.fsm.context import FSMContext
 @dp.message(lambda msg: msg.text == "🎞 Mening Filmlarim")
 async def send_user_products(msg: Message, state: FSMContext):
     user_id = (await db.get_user_by_tg_id(msg.from_user.id))[0]
-    await msg.answer("Ko'rmoqchi bo'lgan guruhingizni tanlang:", reply_markup=await user_orders(user_id))
+    await msg.answer("Ko'rmoqchi bo'lgan filmingizni tanlang:", reply_markup=await user_orders(user_id))
     await state.set_state("get_order_id")
 
 
@@ -44,5 +44,5 @@ async def send_order_info(call: CallbackQuery, state: FSMContext):
 async def back_to_orders_list_func(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
     user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
-    await call.message.answer("Ko'rmoqchi bo'lgan guruhingizni tanlang:", reply_markup=await user_orders(user_id))
+    await call.message.answer("Ko'rmoqchi bo'lgan filmingizni tanlang:", reply_markup=await user_orders(user_id))
     await state.set_state("get_order_id")

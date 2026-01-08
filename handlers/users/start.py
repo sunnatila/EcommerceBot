@@ -28,7 +28,7 @@ async def user_start(message: types.Message, state: FSMContext):
         return
     await message.answer(
         "Assalomu Alaykum.\n"
-        "Univer see botiga xush kelibsiz.\n"
+        "Phd Tv botiga xush kelibsiz.\n"
         "Botdan foydalanish uchun ro'yxatdan o'tishingiz kerak!\n"
         "To'liq Ism-Familiyangizni kiriting:"
     )
