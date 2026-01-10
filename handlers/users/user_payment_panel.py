@@ -3,8 +3,8 @@
 from aiogram.types import Message, CallbackQuery, PreCheckoutQuery, ContentType, LabeledPrice
 
 from data.config import CLICK_API, PAYME_API
-from keyboards.default import user_buttons, get_active_products
-from keyboards.inline import user_product_buttons, user_payment_chooser_button
+from keyboards.default import user_buttons, get_active_products, back_button
+from keyboards.inline import user_product_buttons, user_payment_chooser_button, group_link_button
 from loader import dp, db, bot
 from aiogram.fsm.context import FSMContext
 
@@ -16,48 +16,51 @@ async def send_products(msg: Message, state: FSMContext):
     await msg.answer("Filmlardan birini tanlang!", reply_markup=await get_active_products())
     await state.set_state(ProductStates.products_page)
 
-@dp.message(ProductStates.products_page, lambda msg: msg.text == '🔙 Ortga')
+
+@dp.message(lambda msg: msg.text == '🔙 Ortga')
 async def back_func(msg: Message, state: FSMContext):
     await msg.answer("Kategoriyadan birini tanlang.", reply_markup=user_buttons)
     await state.clear()
 
-
 @dp.message(ProductStates.products_page)
 async def get_product_id(msg: Message, state: FSMContext):
     product_name = msg.text
-    user_id = (await db.get_user_by_tg_id(msg.from_user.id))[0]
     data = await db.get_product_by_name(product_name)
-    print(data)
-    product_id = data[0]
-    if await db.get_user_order(user_id, product_id):
-        await msg.answer("Siz bu filmni allaqachon sotib olgansiz!", reply_markup=user_buttons)
-        await state.clear()
+    if not data:
         return
 
-    await state.update_data({"product_id": product_id})
-    video = data[-1]
-    info = f"👥 <b>Guruhning nomi:</b> {data[1]}\n\n"
-    info += f"📝 <b>Guruhning ma'lumoti:</b> {data[2]}\n\n"
-    info += f"💰 <b>Guruhning narxi:</b> {data[4]} so'm\n"
-    await msg.answer_video(video=video, caption=info, reply_markup=user_product_buttons)
-    await state.set_state(ProductStates.product_info)
+    product_id = data[0]
+    user_row = await db.get_user_by_tg_id(msg.from_user.id)
+    user_id = user_row[0] if user_row else None
 
+    if user_id and await db.get_user_order(user_id, product_id):
+        await msg.answer(
+            text="Kinoni ko'rish uchun guruhga qo'shilish tugmachasini bo'sing!",
+            reply_markup=await group_link_button(data[3]),
+            protect_content = True
+        )
 
-@dp.callback_query(ProductStates.product_info, lambda call: call.data == 'back')
-async def send_payment_method(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
-    await call.message.answer("Kategoriyadan birini tanlang.", reply_markup=user_buttons)
+        return
     await state.clear()
+    video = data[-1]
+    info = f"{data[1]}\n\n"
+    info += f"{data[2]}\n\n"
+    info += f"💰 <b>Narxi:</b> {data[4]} so'm\n\n"
+    info += f"👇🏻 Sotib olish uchun pastdagi tugmani bosing!"
+
+    await msg.answer(f"{msg.text} filmi haqida ma'lumot!", reply_markup=back_button)
+    await msg.answer_video(video=video, caption=info, reply_markup=await user_product_buttons(product_id), parse_mode='HTML')
 
 
-@dp.callback_query(ProductStates.product_info, lambda call: call.data == 'product_buy')
+@dp.callback_query(lambda call: call.data.startswith('product_buy'))
 async def send_payment_method(call: CallbackQuery, state: FSMContext):
+    product_id = int(call.data.split('_')[-1])
+    await state.update_data(product_id=product_id)
     inline_id = call.inline_message_id
     await call.message.edit_reply_markup(inline_id, reply_markup=user_payment_chooser_button)
-    await state.set_state(ProductStates.product_payment)
 
 
-@dp.callback_query(ProductStates.product_info, lambda call: call.data == 'present_product')
+@dp.callback_query(lambda call: call.data == 'present_product')
 async def send_payment_method(call: CallbackQuery, state: FSMContext):
     text = ("""😊<b>Yaqiningizga film sovg'a qilish fikri ajoyib! Albatta manfaatli bo'ladi.</b>
 
@@ -80,10 +83,9 @@ async def send_payment_method(call: CallbackQuery, state: FSMContext):
     
     🎁<b>Birgalikda filmni sovg'a qilamiz!</b>""")
     await call.message.answer(text)
-    await state.set_state(ProductStates.product_info)
 
 
-@dp.callback_query(ProductStates.product_payment)
+@dp.callback_query(lambda call: call.data in ["click", "payme"])
 async def product_buy_func(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
     data = await state.get_data()

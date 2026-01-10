@@ -24,7 +24,7 @@ async def admin_start(message: types.Message, state: FSMContext):
 async def user_start(message: types.Message, state: FSMContext):
     data = await db.get_user_by_tg_id(message.from_user.id)
     if data:
-        await message.answer("Bosh sahifa.", reply_markup=user_buttons)
+        await message.answer("Kategoriyadan birini tanlang.", reply_markup=user_buttons)
         return
     await message.answer(
         "Assalomu Alaykum.\n"

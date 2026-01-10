@@ -1,7 +1,7 @@
 from aiogram.filters import StateFilter
 
-from keyboards.default import user_buttons
-from keyboards.inline import user_orders, back_button
+from keyboards.default import user_buttons, user_orders
+from keyboards.inline import group_link_button
 from loader import db, dp
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -14,35 +14,22 @@ async def send_user_products(msg: Message, state: FSMContext):
     await state.set_state("get_order_id")
 
 
-@dp.callback_query(StateFilter("get_order_id"), lambda call: call.data == 'back')
+@dp.callback_query(lambda call: call.data == 'back')
 async def back_func(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
-    await call.message.answer("Bosh sahifa.", reply_markup=user_buttons)
+    await call.message.answer("Kategoriyadan birini tanlang.", reply_markup=user_buttons)
     await state.clear()
 
 
-@dp.callback_query(StateFilter("get_order_id"), lambda call: call.data.isdigit())
-async def send_order_info(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
-    data = await db.get_product(call.data)
-    video = data[-1]
-    info = (
-        f"👥 <b>Guruhning nomi:</b> {data[1]}\n\n"
-        f"📝 <b>Guruhning ma'lumoti:</b> {data[2]}\n\n"
+@dp.message(StateFilter("get_order_id"))
+async def send_order_info(msg: Message, state: FSMContext):
+    product_name = msg.text
+    data = await db.get_product_by_name(product_name)
+    if not data:
+        return
+    await msg.answer(
+        text="Kinoni ko'rish uchun guruhga qo'shilish tugmachasini bosing!",
+        reply_markup=await group_link_button(data[3]),
+        protect_content = True
     )
-
-    await call.message.answer_video(
-        video=video,
-        caption=info,
-        parse_mode='HTML',
-        reply_markup=await back_button(data[3])
-    )
-    await state.set_state("order_info")
-
-
-@dp.callback_query(StateFilter("order_info"), lambda call: call.data == 'back')
-async def back_to_orders_list_func(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
-    user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
-    await call.message.answer("Ko'rmoqchi bo'lgan filmingizni tanlang:", reply_markup=await user_orders(user_id))
-    await state.set_state("get_order_id")
+    await state.clear()
