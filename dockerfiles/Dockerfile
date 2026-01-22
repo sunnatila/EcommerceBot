@@ -18,5 +18,6 @@ ENV PYTHONPATH="/app"
 EXPOSE 8000
 
 # Entrypoint script (to‘g‘ri yo‘nalishda)
+RUN chmod +x /app/dockerfiles/entrypoint.sh
 ENTRYPOINT ["/app/dockerfiles/entrypoint.sh"]
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
