@@ -22,7 +22,7 @@ async def back_func(msg: Message, state: FSMContext):
 @dp.message(ProductStates.products_page)
 async def get_product_id(msg: Message, state: FSMContext):
     product_name = msg.text
-    await state.clear()
+
     if product_name == "🎁 Chegirma bilan olish":
         info = "<b>🎁 Barcha filmlar uchun maxsus taklif</b>\n\n"
         info += "<b>Filmlar bo‘limidagi barcha filmlarni 20% chegirma bilan tomosha qilish imkoniyati.</b>\n\n"
@@ -48,7 +48,9 @@ async def get_product_id(msg: Message, state: FSMContext):
             await msg.answer(info, reply_markup=await all_pr_buy_buttons(), parse_mode='HTML')
         else:
             await msg.answer("Hozircha sotuvda hech qanday film mavjud emas 😊", reply_markup=user_buttons)
+        await state.set_state(ProductStates.products_page)
         return
+    await state.clear()
     data = await db.get_product_by_name(product_name)
     if not data:
         return
