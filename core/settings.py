@@ -163,7 +163,7 @@ PAYTECHUZ = {
         'ACCOUNT_FIELD': env.str("PAYME_ACCOUNT_FIELD"),
         'AMOUNT_FIELD': env.str("PAYME_AMOUNT_FIELD"),
         'ONE_TIME_PAYMENT': env.bool("PAYME_ONE_TIME_PAYMENT"),
-        'IS_TEST_MODE': True,
+        'IS_TEST_MODE': False,
     },
 }
 

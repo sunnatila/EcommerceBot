@@ -4,25 +4,14 @@ set -e
 
 echo "Waiting for MySQL to start..."
 
-# Ждём, пока MySQL будет доступен под root
-until python -c "import sys; import MySQLdb; 
-try:
-    conn = MySQLdb.connect(
-        host='$MYSQL_HOST',
-        user='$MYSQL_USER',
-        passwd='$MYSQL_PASSWORD',
-        db='$MYSQL_DATABASE'
-    )
-    conn.close()
-except Exception as e:
-    sys.exit(1)
-"; do
+# MySQL tayyor bo'lishini kutish
+# Django'ning check command'ini ishlatamiz, chunki u database connectionni tekshiradi
+until python manage.py check --database default > /dev/null 2>&1; do
   echo "Waiting for database..."
   sleep 2
 done
 
 echo "MySQL is up - executing commands..."
-
 
 echo "Applying database migrations..."
 python manage.py migrate --noinput
