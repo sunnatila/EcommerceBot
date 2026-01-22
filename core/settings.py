@@ -162,11 +162,11 @@ PAYTECHUZ = {
     'PAYME': {
         'PAYME_ID': env.str("PAYME_ID"),
         'PAYME_KEY': env.str("PAYME_KEY"),
-        'ACCOUNT_MODEL': 'product.models.Order',  #  Your invoice model
-        'ACCOUNT_FIELD': 'order_id',
-        'AMOUNT_FIELD': 'cost',
+        'ACCOUNT_MODEL': env.str("PAYME_ACCOUNT_MODEL"),
+        'ACCOUNT_FIELD': env.str("PAYME_ACCOUNT_FIELD"),
+        'AMOUNT_FIELD': env.str("PAYME_AMOUNT_FIELD"),
         'ONE_TIME_PAYMENT': env.bool("PAYME_ONE_TIME_PAYMENT"),
-        'IS_TEST_MODE': True,  # Set to False in production
+        'IS_TEST_MODE': True,
     },
 }
 
