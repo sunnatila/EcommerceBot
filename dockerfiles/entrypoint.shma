@@ -1,0 +1,24 @@
+set -e
+
+echo "Waiting for MySQL to start..."
+
+# MySQL tayyor bo'lishini kutish
+# Django'ning check command'ini ishlatamiz, chunki u database connectionni tekshiradi
+until python manage.py check --database default > /dev/null 2>&1; do
+  echo "Waiting for database..."
+  sleep 2
+done
+
+echo "MySQL is up - executing commands..."
+
+echo "Applying database migrations..."
+python manage.py migrate --noinput
+
+echo "Creating superuser..."
+python manage.py createadmin
+
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
+echo "Starting application..."
+exec "$@"
