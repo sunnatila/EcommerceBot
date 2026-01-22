@@ -13,7 +13,6 @@ class Database:
         self.pool = None
 
     async def connect(self):
-        # Create the connection pool
         self.pool = await aiomysql.create_pool(
             host=env.str('MYSQL_HOST'),
             port=env.int('MYSQL_PORT'),
@@ -23,7 +22,7 @@ class Database:
             autocommit=True
         )
 
-    async def execute(self, query, args: tuple = (), fetchone=False, fetchall=False):
+    async def execute(self, query, args: tuple = (), fetchone=False, fetchall=False, answer=False):
         if self.pool is None:
             await self.connect()
 
@@ -128,6 +127,42 @@ class Database:
                             )
                         )
 
+    async def update_user(self, fullname, phone_number, tg_id):
+        query = """
+        UPDATE users SET fullname=%s, tg_id=%s WHERE phone_number=%s
+        """
+        await self.execute(query, (fullname, tg_id, phone_number))
+
+
+    async def add_user_by_admin(self, phone_number, cost: float, groups: list):
+        user_add_query = """
+                         INSERT INTO users(phone_number, created_at)
+                         VALUES (%s, %s)
+                         """
+        await self.execute(user_add_query, (phone_number, datetime.now().date()))
+
+        user_id = (await self.get_user_by_phone(phone_number))[0]
+        count = len(groups)
+        payment_method = "cash"
+
+        order_add_query = """
+                          INSERT INTO orders(user_id, cost, count, payment_method, is_paid, created_at)
+                          VALUES (%s, %s, %s, %s, %s, %s)
+                          """
+        await self.execute(order_add_query, (user_id, cost, count, payment_method, 1, datetime.now().date()))
+
+        get_last_order_query = """
+            SELECT LAST_INSERT_ID()
+        """
+        order_id = (await self.execute(get_last_order_query, fetchone=True))[0]
+
+        for product_id in groups:
+            orders_product_query = """
+                                   INSERT INTO orders_product(order_id, product_id)
+                                   VALUES (%s, %s)
+                                   """
+            await self.execute(orders_product_query, (order_id, product_id))
+
 
     async def get_user_by_tg_id(self, tg_id):
         query = """
@@ -137,14 +172,33 @@ class Database:
         return await self.execute(query, (tg_id, ), fetchone=True)
 
 
-
-    async def add_order(self, user_id, product_id, paid_status):
+    async def get_user_by_phone(self, phone):
         query = """
-            INSERT INTO orders(user_id, product_id, is_paid, created_at)
-            VALUES(%s, %s, %s, %s)
+            SELECT id, fullname, tg_id FROM users WHERE phone_number=%s
         """
 
-        await self.execute(query, (user_id, product_id, paid_status, datetime.now().date()))
+        return await self.execute(query, (phone, ), fetchone=True)
+
+
+    async def add_order(self, user_id, product_id, cost):
+        query = """
+            INSERT INTO orders(user_id, cost, count, payment_method, is_paid, created_at)
+            VALUES(%s, %s, %s, %s, %s, %s)
+        """
+
+        await self.execute(query, (user_id, cost, 1, 'cash', 1, datetime.now().date()))
+
+        get_last_order_query = """
+                    SELECT LAST_INSERT_ID()
+                """
+        order_id = (await self.execute(get_last_order_query, fetchone=True))[0]
+
+
+        orders_product_query = """
+                               INSERT INTO orders_product(order_id, product_id)
+                               VALUES (%s, %s)
+                               """
+        await self.execute(orders_product_query, (order_id, product_id))
 
 
     async def get_user_paid_orders(self, user_id):
@@ -159,6 +213,7 @@ class Database:
         result = await self.execute(query_alt, (user_id,), fetchall=True)
 
         return result
+
 
     async def get_user_order(self, user_id, product_id):
         query = """

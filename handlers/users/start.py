@@ -1,6 +1,7 @@
 from aiogram import types
 from aiogram.filters import CommandStart, BaseFilter, StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardRemove
 
 from data.config import ADMINS
 from keyboards.default import admin_button, user_buttons, contact_button
@@ -52,15 +53,35 @@ async def get_phone_number_contact(msg: types.Message, state: FSMContext):
     phone_number = msg.contact.phone_number
     data = await state.get_data()
     fullname = data.get("fullname")
-    await db.add_user(fullname, phone_number, msg.from_user.id)
-    await msg.answer(
-        "Botdan muvaffaqiyatli tarzda foydalanishingiz mumkin.", reply_markup=user_buttons
-    )
+    user_data = await db.get_user_by_phone(phone_number)
     await state.clear()
+    if user_data and user_data[2] is None:
+        await db.update_user(fullname, phone_number, msg.from_user.id)
+        await msg.answer(
+            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
+            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
+            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
+        )
+
+
+    elif user_data and user_data[2]:
+        await msg.answer(
+            "Bu raqamga tegishli foydalanuvchi mavjud 😊"
+        )
+
+    else:
+        await db.add_user(fullname, phone_number, msg.from_user.id)
+        await msg.answer(
+            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
+            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
+            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
+        )
 
 
 @dp.message(StateFilter("get_phone_number"))
 async def get_phone_number_text(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    await state.clear()
     phone_number = msg.text.strip()
     if phone_number.startswith('+998') and phone_number[4:].isdigit() and len(phone_number) == 13:
         pass
@@ -73,12 +94,27 @@ async def get_phone_number_text(msg: types.Message, state: FSMContext):
             "Yoki pastdagi tugmachani bosing 👇", reply_markup=contact_button
         )
         return
-    data = await state.get_data()
+
     fullname = data.get("fullname")
-    await db.add_user(fullname, phone_number, msg.from_user.id)
-    await msg.answer(
-        "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
-        "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
-        "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
-    )
-    await state.clear()
+    user_data = await db.get_user_by_phone(phone_number)
+    if user_data and user_data[2] is None:
+        await db.update_user(fullname, phone_number, msg.from_user.id)
+        await msg.answer(
+            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
+            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
+            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
+        )
+
+    elif user_data[2]:
+        await msg.answer(
+            "Bu raqamga tegishli foydalanuvchi mavjud 😊",
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+    else:
+        await db.add_user(fullname, phone_number, msg.from_user.id)
+        await msg.answer(
+            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
+            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
+            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
+        )

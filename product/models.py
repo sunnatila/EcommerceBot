@@ -24,13 +24,6 @@ class Product(models.Model):
         db_table = 'products'
 
 
-# ORDER_STATUS = (
-#     ("payment_waiting", 'Kutilmoqda'),
-#     ("is_paid", 'To\'landi'),
-#     ("is_not_paid", "To'lanmadi"),
-#     ("canceled", "Bekor qilindi")
-# )
-
 class Order(models.Model):
     user = models.ForeignKey(to='user.User', on_delete=models.CASCADE)
     product = models.ManyToManyField(to=Product)
