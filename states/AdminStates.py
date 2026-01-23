@@ -2,12 +2,12 @@ from aiogram.fsm.state import State, StatesGroup
 
 
 class GroupStates(StatesGroup):
-    group_name = State()
-    group_description = State()
-    group_paid = State()
-    group_price = State()
-    group_url = State()
-    group_status = State()
-    group_video = State()
-    group_save = State()
+    film_name = State()
+    film_description = State()
+    film_paid = State()
+    film_price = State()
+    film_url = State()
+    film_status = State()
+    film_video = State()
+    film_save = State()
 

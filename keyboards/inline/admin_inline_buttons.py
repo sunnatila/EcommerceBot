@@ -2,7 +2,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
 from loader import db
 
-group_active_button = InlineKeyboardBuilder(
+film_active_button = InlineKeyboardBuilder(
     markup=[
         [
             InlineKeyboardButton(text="Ha aktiv", callback_data="active"),
@@ -12,7 +12,7 @@ group_active_button = InlineKeyboardBuilder(
 ).adjust(2).as_markup()
 
 
-admin_group_save_buttons = InlineKeyboardBuilder(
+admin_film_save_buttons = InlineKeyboardBuilder(
     markup=[
         [
             InlineKeyboardButton(text="💾 Saqlash", callback_data="save"),
@@ -35,7 +35,7 @@ async def get_product_list():
     return groups_info_button.adjust(2).as_markup()
 
 
-group_settings_button = InlineKeyboardBuilder(
+film_settings_button = InlineKeyboardBuilder(
     markup=[
         [
             InlineKeyboardButton(text="✏️Tahrirlash", callback_data="edit"),
