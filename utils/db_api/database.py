@@ -1,7 +1,5 @@
 from datetime import datetime
-
 import aiomysql
-import asyncio
 from environs import Env
 
 env = Env()
@@ -22,7 +20,7 @@ class Database:
             autocommit=True
         )
 
-    async def execute(self, query, args: tuple = (), fetchone=False, fetchall=False, answer=False):
+    async def execute(self, query, args: tuple = (), fetchone=False, fetchall=False):
         if self.pool is None:
             await self.connect()
 
@@ -33,236 +31,208 @@ class Database:
                     return await cur.fetchone()
                 elif fetchall:
                     return await cur.fetchall()
-                else:
-                    return None
+                return None
 
+    # ==================== PRODUCT FUNCTIONS ====================
 
-    async def add_product(self, group_name, group_description, group_price,
-                          group_url,group_status,group_video):
+    async def add_product(self, title, description, price_1080p, group_url_1080p,
+                          price_4k, group_url_4k, is_active, video_url):
         query = """
-            INSERT INTO products(title, description, video_url, group_url, price, is_active, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """
-        await self.execute(query,
-                           (
-                               group_name, group_description, group_video,
-                               group_url, group_price, group_status,
-                               datetime.now().date(), datetime.now()
-                           )
-                    )
+            INSERT INTO products(title, description, video_url, price_1080p, group_url_1080p,
+                                 price_4k, group_url_4k, is_active, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        await self.execute(query, (
+            title, description, video_url, price_1080p, group_url_1080p,
+            price_4k, group_url_4k, is_active, datetime.now().date(), datetime.now()
+        ))
 
-    async def update_product(self, product_id, group_name, group_description, group_price,
-                          group_url,group_status,group_video):
+    async def update_product(self, product_id, title, description, price_1080p, group_url_1080p,
+                             price_4k, group_url_4k, is_active, video_url):
         query = """
             UPDATE products
-            SET title=%s, description=%s, video_url=%s, group_url=%s, price=%s, is_active=%s, updated_at=%s
+            SET title=%s, description=%s, video_url=%s, price_1080p=%s, group_url_1080p=%s,
+                price_4k=%s, group_url_4k=%s, is_active=%s, updated_at=%s
             WHERE id=%s
-            """
-        await self.execute(query,
-                           (
-                               group_name, group_description, group_video,
-                               group_url, group_price, group_status,
-                               datetime.now(), product_id
-                           )
-                    )
-
-
-    async def get_free_products(self):
-        query = """
-            SELECT id, title FROM products WHERE price=0 AND is_active='active'
         """
-
-        return await self.execute(query, fetchall=True)
-
+        await self.execute(query, (
+            title, description, video_url, price_1080p, group_url_1080p,
+            price_4k, group_url_4k, is_active, datetime.now(), product_id
+        ))
 
     async def get_products(self):
-        query = """
-            SELECT id, title FROM products
-        """
-
-        return await self.execute(query=query, fetchall=True)
-
-
-    async def get_product(self, product_id):
-        query = """
-            SELECT * FROM products WHERE id=%s
-        """
-        return await self.execute(query, (product_id, ), fetchone=True)
-
-
-    async def get_product_by_name(self, pr_name):
-        query = """
-            SELECT * FROM products WHERE title=%s
-        """
-        return await self.execute(query, (pr_name, ), fetchone=True)
-
-    async def get_active_products(self):
-        query = """
-            SELECT * FROM products WHERE is_active='active' AND price>0
-        """
-
+        query = "SELECT id, title FROM products"
         return await self.execute(query, fetchall=True)
 
+    async def get_product(self, product_id):
+        query = "SELECT * FROM products WHERE id=%s"
+        return await self.execute(query, (product_id,), fetchone=True)
+
+    async def get_product_by_name(self, pr_name):
+        query = "SELECT * FROM products WHERE title=%s"
+        return await self.execute(query, (pr_name,), fetchone=True)
+
+    async def get_active_products(self):
+        query = "SELECT * FROM products WHERE is_active='active' AND (price_1080p > 0 OR price_4k > 0)"
+        return await self.execute(query, fetchall=True)
+
+    async def get_free_products(self):
+        query = "SELECT id, title FROM products WHERE price_1080p=0 AND price_4k=0 AND is_active='active'"
+        return await self.execute(query, fetchall=True)
 
     async def delete_product(self, product_id):
-        query = """
-            DELETE FROM products WHERE id=%s
-        """
+        query = "DELETE FROM products WHERE id=%s"
+        await self.execute(query, (product_id,))
 
-        await self.execute(query, (product_id, ))
-
-
-    # User functions ---------------------------------------------------------------------------
-
+    # ==================== USER FUNCTIONS ====================
 
     async def add_user(self, fullname, phone_number, tg_id):
         query = """
             INSERT INTO users(fullname, phone_number, tg_id, created_at)
             VALUES (%s, %s, %s, %s)
         """
-        await self.execute(query,
-                           (
-                            fullname, phone_number,
-                            tg_id, datetime.now().date()
-                            )
-                        )
+        await self.execute(query, (fullname, phone_number, tg_id, datetime.now().date()))
 
     async def update_user(self, fullname, phone_number, tg_id):
-        query = """
-        UPDATE users SET fullname=%s, tg_id=%s WHERE phone_number=%s
-        """
+        query = "UPDATE users SET fullname=%s, tg_id=%s WHERE phone_number=%s"
         await self.execute(query, (fullname, tg_id, phone_number))
 
+    async def get_user_by_tg_id(self, tg_id):
+        query = "SELECT id, fullname FROM users WHERE tg_id=%s"
+        return await self.execute(query, (tg_id,), fetchone=True)
 
-    async def add_user_by_admin(self, phone_number, cost: float, groups: list):
-        user_add_query = """
-                         INSERT INTO users(phone_number, created_at)
-                         VALUES (%s, %s)
-                         """
+    async def get_user_by_phone(self, phone):
+        query = "SELECT id, fullname, tg_id FROM users WHERE phone_number=%s"
+        return await self.execute(query, (phone,), fetchone=True)
+
+    async def add_user_by_admin(self, phone_number, cost: float, groups: list, resolution: str):
+        user_add_query = "INSERT INTO users(phone_number, created_at) VALUES (%s, %s)"
         await self.execute(user_add_query, (phone_number, datetime.now().date()))
 
         user_id = (await self.get_user_by_phone(phone_number))[0]
         count = len(groups)
-        payment_method = "cash"
 
         order_add_query = """
-                          INSERT INTO orders(user_id, cost, count, payment_method, is_paid, created_at)
-                          VALUES (%s, %s, %s, %s, %s, %s)
-                          """
-        await self.execute(order_add_query, (user_id, cost, count, payment_method, 1, datetime.now().date()))
-
-        get_last_order_query = """
-            SELECT LAST_INSERT_ID()
+            INSERT INTO orders(user_id, cost, count, resolution, payment_method, is_paid, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        order_id = (await self.execute(get_last_order_query, fetchone=True))[0]
+        await self.execute(order_add_query, (user_id, cost, count, resolution, "cash", 1, datetime.now().date()))
+
+        order_id = (await self.execute("SELECT LAST_INSERT_ID()", fetchone=True))[0]
 
         for product_id in groups:
-            orders_product_query = """
-                                   INSERT INTO orders_product(order_id, product_id)
-                                   VALUES (%s, %s)
-                                   """
-            await self.execute(orders_product_query, (order_id, product_id))
+            await self.execute(
+                "INSERT INTO orders_product(order_id, product_id) VALUES (%s, %s)",
+                (order_id, product_id)
+            )
 
+    # ==================== ORDER FUNCTIONS ====================
 
-    async def get_user_by_tg_id(self, tg_id):
+    async def add_order(self, user_id, product_id, cost, resolution):
         query = """
-            SELECT id, fullname FROM users WHERE tg_id=%s
+            INSERT INTO orders(user_id, cost, count, resolution, payment_method, is_paid, created_at)
+            VALUES(%s, %s, %s, %s, %s, %s, %s)
         """
+        await self.execute(query, (user_id, cost, 1, resolution, 'cash', 1, datetime.now().date()))
 
-        return await self.execute(query, (tg_id, ), fetchone=True)
+        order_id = (await self.execute("SELECT LAST_INSERT_ID()", fetchone=True))[0]
+        await self.execute(
+            "INSERT INTO orders_product(order_id, product_id) VALUES (%s, %s)",
+            (order_id, product_id)
+        )
 
+    async def get_user_paid_orders(self, user_id, resolution=None):
+        """Foydalanuvchining to'langan buyurtmalarini olish"""
+        if resolution:
+            query = """
+                SELECT p.id, p.title, o.resolution
+                FROM products p
+                JOIN orders_product op ON p.id = op.product_id
+                JOIN orders o ON op.order_id = o.id
+                WHERE o.user_id = %s AND o.is_paid = True AND o.resolution = %s
+            """
+            return await self.execute(query, (user_id, resolution), fetchall=True)
+        else:
+            query = """
+                SELECT p.id, p.title, o.resolution
+                FROM products p
+                JOIN orders_product op ON p.id = op.product_id
+                JOIN orders o ON op.order_id = o.id
+                WHERE o.user_id = %s AND o.is_paid = True
+            """
+            return await self.execute(query, (user_id,), fetchall=True)
 
-    async def get_user_by_phone(self, phone):
-        query = """
-            SELECT id, fullname, tg_id FROM users WHERE phone_number=%s
-        """
-
-        return await self.execute(query, (phone, ), fetchone=True)
-
-
-    async def add_order(self, user_id, product_id, cost):
-        query = """
-            INSERT INTO orders(user_id, cost, count, payment_method, is_paid, created_at)
-            VALUES(%s, %s, %s, %s, %s, %s)
-        """
-
-        await self.execute(query, (user_id, cost, 1, 'cash', 1, datetime.now().date()))
-
-        get_last_order_query = """
-                    SELECT LAST_INSERT_ID()
-                """
-        order_id = (await self.execute(get_last_order_query, fetchone=True))[0]
-
-
-        orders_product_query = """
-                               INSERT INTO orders_product(order_id, product_id)
-                               VALUES (%s, %s)
-                               """
-        await self.execute(orders_product_query, (order_id, product_id))
-
-
-    async def get_user_paid_orders(self, user_id):
-        query_alt = """
-                    SELECT p.id, p.title
-                    FROM products p
-                    JOIN orders_product op ON p.id = op.product_id
-                    JOIN orders o ON op.order_id = o.id
-                    WHERE o.user_id = %s
-                        AND o.is_paid = True
-                """
-        result = await self.execute(query_alt, (user_id,), fetchall=True)
-
-        return result
-
-
-    async def get_user_order(self, user_id, product_id):
+    async def get_user_order(self, user_id, product_id, resolution):
+        """Foydalanuvchi ma'lum filmni ma'lum resolutsionda sotib olganmi?"""
         query = """
             SELECT o.* FROM orders o
             JOIN orders_product op ON o.id = op.order_id
-            WHERE o.user_id = %s AND op.product_id = %s AND o.is_paid = True
+            WHERE o.user_id = %s AND op.product_id = %s AND o.resolution = %s AND o.is_paid = True
             LIMIT 1
         """
-        return await self.execute(query, (user_id, product_id), fetchone=True)
+        return await self.execute(query, (user_id, product_id, resolution), fetchone=True)
 
-    # Admins panel ---------------------------------------------------------------
+    async def get_unpurchased_products(self, user_id, resolution):
+        """Foydalanuvchi sotib olmagan filmlar (ma'lum resolution uchun)"""
+        query = """
+            SELECT p.* FROM products p
+            WHERE p.is_active = 'active'
+              AND (p.price_1080p > 0 OR p.price_4k > 0)
+              AND p.id NOT IN (
+                  SELECT op.product_id FROM orders_product op
+                  JOIN orders o ON op.order_id = o.id
+                  WHERE o.user_id = %s AND o.resolution = %s AND o.is_paid = True
+              )
+        """
+        return await self.execute(query, (user_id, resolution), fetchall=True)
+
+
+    async def get_user_unique_films(self, user_id):
+        """Foydalanuvchi sotib olgan unikal filmlar (resolution'siz)"""
+        query = """
+                SELECT DISTINCT p.id, p.title
+                FROM products p
+                         JOIN orders_product op ON p.id = op.product_id
+                         JOIN orders o ON op.order_id = o.id
+                WHERE o.user_id = %s \
+                  AND o.is_paid = True
+                ORDER BY p.title \
+                """
+        return await self.execute(query, (user_id,), fetchall=True)
+
+
+    async def get_user_purchased_resolutions(self, user_id, product_id):
+        """Foydalanuvchi ma'lum filmni qaysi resolution'larda sotib olgan"""
+        query = """
+                SELECT DISTINCT o.resolution
+                FROM orders o
+                         JOIN orders_product op ON o.id = op.order_id
+                WHERE o.user_id = %s \
+                  AND op.product_id = %s \
+                  AND o.is_paid = True \
+                """
+        result = await self.execute(query, (user_id, product_id), fetchall=True)
+        return [r[0] for r in result] if result else []
+
+
+    # ==================== ADMIN FUNCTIONS ====================
 
     async def get_admins(self):
-        query = """
-            SELECT * FROM admin_users
-        """
-
+        query = "SELECT * FROM admin_users"
         return await self.execute(query, fetchall=True)
 
-    async def add_admin(self,username):
-        query = """
-            INSERT INTO admin_users(username) 
-            VALUES(%s)
-        """
-
-        await self.execute(query,(username,))
-
+    async def add_admin(self, username):
+        query = "INSERT INTO admin_users(username) VALUES(%s)"
+        await self.execute(query, (username,))
 
     async def get_admin_by_id(self, admin_id):
-        query = """
-            SELECT * FROM admin_users WHERE id=%s
-        """
-
+        query = "SELECT * FROM admin_users WHERE id=%s"
         return await self.execute(query, (admin_id,), fetchone=True)
 
-
     async def update_admin_info(self, admin_id, username):
-        query = """
-            UPDATE admin_users
-            SET username=%s
-            WHERE id=%s
-        """
-
+        query = "UPDATE admin_users SET username=%s WHERE id=%s"
         await self.execute(query, (username, admin_id))
 
-
     async def delete_admin(self, admin_id):
-        query = """
-                    DELETE FROM admin_users WHERE id=%s
-                """
-
+        query = "DELETE FROM admin_users WHERE id=%s"
         await self.execute(query, (admin_id,))

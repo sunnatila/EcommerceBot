@@ -15,29 +15,27 @@ user_buttons = ReplyKeyboardBuilder(
 
 contact_button = ReplyKeyboardBuilder(
     markup=[
-        [
-            KeyboardButton(text="📞 Kontaktni ulashish", request_contact=True)
-        ]
+        [KeyboardButton(text="📞 Kontaktni ulashish", request_contact=True)]
     ]
 ).adjust(1).as_markup(resize_keyboard=True)
 
 
+async def user_orders_keyboard(unique_films):
+    """Foydalanuvchining sotib olgan unikal filmlari (resolution'siz)"""
+    keyboard = ReplyKeyboardBuilder()
 
-async def user_orders(user_id):
-    user_paid_orders = await db.get_user_paid_orders(user_id)
-    orders_button = ReplyKeyboardBuilder()
-    if user_paid_orders:
-        for order in user_paid_orders:
-            orders_button.add(KeyboardButton(text=f"{order[1]}"))
-    orders_button.add(KeyboardButton(text="🔙 Ortga"))
+    for film in unique_films:
+        # film: (product_id, title)
+        keyboard.add(KeyboardButton(text=film[1]))
 
-    return orders_button.adjust(2).as_markup(resize_keyboard=True)
-
+    keyboard.add(KeyboardButton(text="🔙 Ortga"))
+    return keyboard.adjust(2).as_markup(resize_keyboard=True)
 
 
 async def get_free_films():
     data = await db.get_free_products()
     films = ReplyKeyboardBuilder()
+
     if data:
         for film in data:
             films.add(KeyboardButton(text=f"{film[1]}"))
@@ -48,8 +46,6 @@ async def get_free_films():
 
 back_button = ReplyKeyboardBuilder(
     markup=[
-        [
-            KeyboardButton(text="🔙 Ortga")
-        ]
+        [KeyboardButton(text="🔙 Ortga")]
     ]
 ).adjust(1).as_markup(resize_keyboard=True)

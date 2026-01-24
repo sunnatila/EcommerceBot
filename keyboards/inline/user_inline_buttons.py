@@ -1,73 +1,128 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
-from loader import db
 
-async def user_product_buttons(pr_id):
-    buttons = InlineKeyboardBuilder(
+
+# ==================== BITTA FILM UCHUN ====================
+
+async def user_product_buttons(product_id, resolution, price):
+    """Bitta film uchun tugmalar - callback_data ichida barcha ma'lumotlar"""
+    return InlineKeyboardBuilder(
         markup=[
             [
-                InlineKeyboardButton(text="Sotib olish", callback_data=f"product_buy_{pr_id}"),
-                InlineKeyboardButton(text="Sovgʻa qilish🎁", callback_data="present_product"),
+                # buy_{product_id}_{resolution}_{price}
+                InlineKeyboardButton(text="Sotib olish", callback_data=f"buy_{product_id}_{resolution}_{price}"),
+                InlineKeyboardButton(text="Sovg'a qilish 🎁", callback_data="present_product"),
             ]
         ]
     ).adjust(2).as_markup()
-    return buttons
 
 
-async def all_pr_buy_buttons():
-    buttons = InlineKeyboardBuilder(
+def get_payment_buttons(product_id, resolution, price):
+    """To'lov usullarini tanlash - callback_data ichida barcha ma'lumotlar"""
+    return InlineKeyboardBuilder(
         markup=[
             [
-                InlineKeyboardButton(text="Sotib olish", callback_data=f"all_product_buy"),
+                # pay_{method}_{product_id}_{resolution}_{price}
+                InlineKeyboardButton(text="💳 Click", callback_data=f"pay_click_{product_id}_{resolution}_{price}"),
+                InlineKeyboardButton(text="💳 PayMe", callback_data=f"pay_payme_{product_id}_{resolution}_{price}"),
+            ],
+            [
+                InlineKeyboardButton(text="Boshqa to'lov usuli", callback_data=f"pay_other_{product_id}_{resolution}_{price}"),
             ]
         ]
+    ).as_markup()
+
+
+# ==================== HAMMA FILMLAR UCHUN ====================
+
+async def all_pr_buy_buttons(products_str, resolution, price):
+    """Hamma filmlar uchun sotib olish tugmasi"""
+    # allbuy_{products_str}_{resolution}_{price}
+    return InlineKeyboardBuilder(
+        markup=[
+            [InlineKeyboardButton(text="Sotib olish", callback_data=f"allbuy_{products_str}_{resolution}_{price}")]
+        ]
     ).adjust(1).as_markup()
-    return buttons
 
 
-user_payment_chooser_button = InlineKeyboardBuilder(
+def get_all_payment_buttons(products_str, resolution, price):
+    """Hamma filmlar uchun to'lov usullari"""
+    return InlineKeyboardBuilder(
+        markup=[
+            [
+                # allpay_{method}_{products_str}_{resolution}_{price}
+                InlineKeyboardButton(text="💳 Click", callback_data=f"allpay_click_{products_str}_{resolution}_{price}"),
+                InlineKeyboardButton(text="💳 PayMe", callback_data=f"allpay_payme_{products_str}_{resolution}_{price}"),
+            ],
+            [
+                InlineKeyboardButton(text="Boshqa to'lov usuli", callback_data=f"allpay_other_{products_str}_{resolution}_{price}"),
+            ]
+        ]
+    ).as_markup()
+
+
+# ==================== RESOLUTION TANLASH ====================
+
+resolution_buttons = InlineKeyboardBuilder(
     markup=[
         [
-            InlineKeyboardButton(text="💳 Click", callback_data="click"),
-            InlineKeyboardButton(text="💳 PayMe", callback_data="payme"),
-            InlineKeyboardButton(text="Boshqa to'lov usuli", callback_data="other_payment"),
+            InlineKeyboardButton(text="📺 1080p", callback_data="res_1080p"),
+            InlineKeyboardButton(text="📺 4K", callback_data="res_4k"),
         ]
     ]
 ).adjust(2).as_markup()
 
 
-all_product_payment_chooser_button = InlineKeyboardBuilder(
+all_resolution_buttons = InlineKeyboardBuilder(
     markup=[
         [
-            InlineKeyboardButton(text="💳 Click", callback_data="all_product_click"),
-            InlineKeyboardButton(text="💳 PayMe", callback_data="all_product_payme"),
-            InlineKeyboardButton(text="Boshqa to'lov usuli", callback_data="all_product_other_payment"),
+            InlineKeyboardButton(text="📺 1080p", callback_data="all_res_1080p"),
+            InlineKeyboardButton(text="📺 4K", callback_data="all_res_4k"),
         ]
     ]
 ).adjust(2).as_markup()
 
 
+# ==================== BOSHQA TUGMALAR ====================
 
 async def group_link_button(link):
-    button = InlineKeyboardBuilder(
+    return InlineKeyboardBuilder(
         markup=[
-            [
-                InlineKeyboardButton(text="Guruhga qo'shilish", url=link)
-            ]
+            [InlineKeyboardButton(text="Guruhga qo'shilish", url=link)]
         ]
     ).adjust(1).as_markup()
-    return button
-
 
 
 async def sent_payment_url(data: dict):
     from product.views import send_link_for_payment
     result = await send_link_for_payment(data)
     payment_url = result.get('payment_url')
-    button = InlineKeyboardBuilder(
+    return InlineKeyboardBuilder(
         markup=[
-            [
-                InlineKeyboardButton(text="Sotib olish", url=payment_url)
-            ]
+            [InlineKeyboardButton(text="To'lovga o'tish", url=payment_url)]
         ]
     ).adjust(1).as_markup()
-    return button
+
+
+def my_film_resolution_buttons(product_id, purchased_resolutions):
+    """Mening filmlarim - resolution tanlash tugmalari
+
+    purchased_resolutions: ['1080p', '4k'] yoki ['1080p'] yoki ['4k'] yoki []
+    """
+    buttons = []
+
+    # 1080p tugmasi
+    if '1080p' in purchased_resolutions:
+        text_1080p = "📺 1080p ✅"
+    else:
+        text_1080p = "📺 1080p ❌"
+    buttons.append(InlineKeyboardButton(text=text_1080p, callback_data=f"myfilm_{product_id}_1080p"))
+
+    # 4K tugmasi
+    if '4k' in purchased_resolutions:
+        text_4k = "📺 4K ✅"
+    else:
+        text_4k = "📺 4K ❌"
+    buttons.append(InlineKeyboardButton(text=text_4k, callback_data=f"myfilm_{product_id}_4k"))
+
+    return InlineKeyboardBuilder(markup=[buttons]).adjust(2).as_markup()
+
