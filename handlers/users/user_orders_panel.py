@@ -87,7 +87,8 @@ async def select_resolution_my_film(call: CallbackQuery, state: FSMContext):
             f"✅ <b>{product[1]}</b> - {resolution.upper()}\n\n"
             "Kinoni ko'rish uchun quyidagi tugmani bosing 👇",
             reply_markup=await group_link_button(group_url),
-            parse_mode='HTML'
+            parse_mode='HTML',
+            protect_content = True,
         )
     else:
         # Sotib olmagan

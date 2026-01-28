@@ -18,8 +18,7 @@ async def send_free_group_info(msg: Message, state: FSMContext):
     data = await db.get_product_by_name(msg.text)
     if not data:
         return
-
-    video = data[-1]
+    video = data[6]
     info = (
         f"<b>{data[1]}</b>\n\n"
         f"{data[2]}\n\n"
@@ -30,6 +29,6 @@ async def send_free_group_info(msg: Message, state: FSMContext):
         video=video,
         caption=info,
         parse_mode='HTML',
-        reply_markup=await group_link_button(data[3]),
+        reply_markup=await group_link_button(data[7]),
         protect_content=True,
     )
