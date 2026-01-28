@@ -87,12 +87,18 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'dj_db_conn_pool.backends.mysql',  # Connection pool
         'NAME': env.str("MYSQL_DATABASE"),
         'USER': env.str("MYSQL_USER"),
         'PASSWORD': env.str("MYSQL_PASSWORD"),
         'HOST': env.str("MYSQL_HOST"),
         'PORT': env.str("MYSQL_PORT"),
+        'POOL_OPTIONS': {
+            'POOL_SIZE': 20,        # Doimiy 20 ta ulanish
+            'MAX_OVERFLOW': 30,     # Qo'shimcha 30 ta (jami 50)
+            'RECYCLE': 300,         # 5 daqiqada yangilanadi
+            'PRE_PING': True,       # "Server has gone away" oldini oladi
+        }
     }
 }
 

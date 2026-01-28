@@ -9,7 +9,7 @@ from keyboards.inline import (
     get_payment_buttons, get_all_payment_buttons
 )
 from loader import dp, db
-from utils.texts import get_text
+from utils.texts import get_text, get_text_with_admin
 from states import ProductStates
 
 
@@ -91,6 +91,7 @@ async def select_resolution_single(call: CallbackQuery, state: FSMContext):
                 protect_content=True,
                 parse_mode='HTML'
             )
+            await state.set_state(ProductStates.products_page)
             return
 
     # Sotib olmagan - film ma'lumotini ko'rsatish
@@ -129,7 +130,7 @@ async def send_payment_method(call: CallbackQuery):
 
 @dp.callback_query(lambda call: call.data == 'present_product')
 async def send_present_product(call: CallbackQuery):
-    text = get_text("present_product")
+    text = await get_text_with_admin("present_product", db)
     await call.message.answer(text)
     await call.answer()
 
@@ -145,8 +146,8 @@ async def product_buy_func(call: CallbackQuery):
 
     if method == 'other':
         await call.message.delete()
-        text = get_text("other_payment_info")
-        await call.message.answer(text)
+        text = await get_text_with_admin("other_payment_info", db)
+        await call.message.answer(text, parse_mode='HTML')
         await call.message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
         return
 
@@ -268,7 +269,7 @@ async def all_product_buy_func(call: CallbackQuery):
             info += f"<b>{i}. {product[1]}</b>\n"
 
         info += f"\n💰 <b>UMUMIY TO'LOV:</b> {format_price(price)} so'm\n\n"
-        info += get_text("other_payment_info")
+        info += await get_text_with_admin("other_payment_info", db)
 
         await call.message.answer(info, parse_mode='HTML')
         await call.message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
