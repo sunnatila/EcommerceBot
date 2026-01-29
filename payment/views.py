@@ -8,24 +8,14 @@ from loader import bot, db
 from product.models import Order
 
 
-async def send_url_func(data):
-    count = data["count"]
-    resolution = data["resolution"]
-    product = data["product"]
-    user = data["user"]
-    if count == 1:
-        pr_data = await db.get_product(product)
-        if resolution == "1080p":
-            pr_url = pr_data[7]
-        else:
-            pr_url = pr_data[8]
-
-        await bot.send_message(
-            chat_id=user,
-            text="Kinoni ko'rish uchun pastgi tugmachani bo'sing",
-            reply_markup=await group_link_button(pr_url),
-            protect_content=True,
-        )
+async def send_url_func(user_tg_id, url):
+    """Foydalanuvchiga film URL ni yuborish"""
+    await bot.send_message(
+        chat_id=user_tg_id,
+        text="Kinoni ko'rish uchun pastgi tugmachani bo'sing",
+        reply_markup=await group_link_button(url),
+        protect_content=True,
+    )
 
 send_url_to_user = async_to_sync(send_url_func)
 
@@ -36,13 +26,18 @@ class PaymeWebhookView(BasePaymeWebhookView):
         order = Order.objects.get(id=transaction_obj.account_id)
         order.is_paid = True
         order.save()
-        data = {
-            "user": order.user.tg_id,
-            "product": order.product,
-            "count": order.count,
-            "resolution": order.resolution,
-        }
-        send_url_to_user(data)
+        if order.count == 1:
+            product = order.product.first()
+            if product:
+                # Resolution ga qarab URL olish
+                if order.resolution == "4k":
+                    url = product.group_url_4k
+                else:
+                    url = product.group_url_1080p
+
+                # Foydalanuvchiga yuborish
+                if url:
+                    send_url_to_user(order.user.tg_id, url)
 
 
     def cancelled_payment(self, params, transaction_obj):
@@ -63,13 +58,18 @@ class ClickWebhookAPIView(ClickWebhook):
         order = Order.objects.get(id=transaction.account_id)
         order.is_paid = True
         order.save()
-        data = {
-            "user": order.user.tg_id,
-            "product": order.product,
-            "count": order.count,
-            "resolution": order.resolution,
-        }
-        send_url_to_user(data)
+        if order.count == 1:
+            product = order.product.first()
+            if product:
+                # Resolution ga qarab URL olish
+                if order.resolution == "4k":
+                    url = product.group_url_4k
+                else:
+                    url = product.group_url_1080p
+
+                # Foydalanuvchiga yuborish
+                if url:
+                    send_url_to_user(order.user.tg_id, url)
 
     def cancelled_payment(self, params):
         """
