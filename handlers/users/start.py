@@ -30,7 +30,7 @@ async def user_start(message: types.Message, state: FSMContext):
         return
     await message.answer(
         "Assalomu alaykum!\n"
-        "PhD TV botiga xush kelibsiz 🎬\n\n"
+        "PhD TV ga xush kelibsiz 😊\n\n"
         "Botdan foydalanish uchun avval ro'yxatdan o'tishingiz kerak.\n"
         "Iltimos, to'liq ism-familiyangizni kiriting:"
     )
@@ -82,7 +82,7 @@ async def get_phone_number_contact(msg: types.Message, state: FSMContext):
 async def get_phone_number_text(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
-    phone_number = msg.text.strip()
+    phone_number = msg.text
     if phone_number.startswith('+998') and phone_number[4:].isdigit() and len(phone_number) == 13:
         pass
     elif phone_number.isdigit() and len(phone_number) == 9:
