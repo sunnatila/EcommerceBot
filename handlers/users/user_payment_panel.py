@@ -33,7 +33,7 @@ async def get_product_id(msg: Message, state: FSMContext):
     # ==================== CHEGIRMA BILAN OLISH ====================
     if product_name == "🎁 Chegirma bilan olish":
         await msg.answer(
-            "📺 <b>Qaysi sifatda tomosha qilmoqchisiz?</b>\n\n"
+            "<b>Qaysi sifatda tomosha qilishni xohlaysiz?</b>\n\n"
             "🎬 1080p - Yuqori sifat.\n"
             "✨ 4K - Maksimal aniqlik.",
             reply_markup=all_resolution_buttons,
@@ -48,7 +48,7 @@ async def get_product_id(msg: Message, state: FSMContext):
 
     await state.update_data(product_id=data[0])
     await msg.answer(
-        f"📺 <b>Qaysi sifatda tomosha qilmoqchisiz?</b>\n\n"
+        f"📺 <b>Qaysi sifatda tomosha qilishni xohlaysiz?</b>\n\n"
         f"🎬 1080p - Yuqori sifat.\n💎 Tomosha narxi: {format_price(data[9])} so'm\n\n"
         f"✨ 4K - Maksimal aniqlik.\n💎 Tomosha narxi: {format_price(data[10])} so'm",
         reply_markup=await resolution_buttons(pr_id=data[0]),

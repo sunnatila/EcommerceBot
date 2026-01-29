@@ -53,8 +53,8 @@ async def select_film_from_my_films(msg: Message, state: FSMContext):
     purchased_resolutions = await db.get_user_purchased_resolutions(user_id, product_id)
 
     await msg.answer(
-        f"📺 <b>{film_name}</b>\n\n"
-        "Qaysi sifatda tomosha qilmoqchisiz?",
+        f"<b>{film_name}</b>\n\n"
+        "Qaysi sifatda tomosha qilishni xohlaysiz?",
         reply_markup=my_film_resolution_buttons(product_id, purchased_resolutions),
         parse_mode='HTML'
     )
