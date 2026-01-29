@@ -34,12 +34,11 @@ async def get_product_id(msg: Message, state: FSMContext):
     if product_name == "🎁 Chegirma bilan olish":
         await msg.answer(
             "📺 <b>Qaysi sifatda tomosha qilmoqchisiz?</b>\n\n"
-            "1080p - standart sifat\n"
-            "4K - yuqori sifat",
+            "🎬 1080p - Yuqori sifat.\n"
+            "✨ 4K - Maksimal aniqlik.",
             reply_markup=all_resolution_buttons,
             parse_mode='HTML'
         )
-        await state.set_state(ProductStates.select_resolution_all)
         return
 
     # ==================== BITTA FILM TANLASH ====================
@@ -50,18 +49,17 @@ async def get_product_id(msg: Message, state: FSMContext):
     await state.update_data(product_id=data[0])
     await msg.answer(
         f"📺 <b>Qaysi sifatda tomosha qilmoqchisiz?</b>\n\n"
-        f"1080p - standart sifat.\n💎 Tomosha narxi: {format_price(data[9])} so'm\n"
-        f"4K - yuqori sifat.\n💎 Tomosha narxi: {format_price(data[10])} so'm",
-        reply_markup=resolution_buttons,
+        f"🎬 1080p - Yuqori sifat.\n💎 Tomosha narxi: {format_price(data[9])} so'm\n\n"
+        f"✨ 4K - Maksimal aniqlik.\n💎 Tomosha narxi: {format_price(data[10])} so'm",
+        reply_markup=await resolution_buttons(pr_id=data[0]),
         parse_mode='HTML'
     )
-    await state.set_state(ProductStates.select_resolution)
 
 
 # ==================== BITTA FILM - RESOLUTION TANLASH ====================
-@dp.callback_query(ProductStates.select_resolution, lambda call: call.data.startswith('res_'))
+@dp.callback_query(lambda call: call.data.startswith('res_'))
 async def select_resolution_single(call: CallbackQuery, state: FSMContext):
-    resolution = call.data.replace('res_', '')
+    resolution = call.data.replace('res_', '').split('_')[0]
     await call.message.delete()
 
     data = await state.get_data()
@@ -86,7 +84,7 @@ async def select_resolution_single(call: CallbackQuery, state: FSMContext):
         if existing_order:
             await call.message.answer(
                 f"✅ Siz bu filmni {resolution.upper()} sifatda allaqachon sotib olgansiz!\n\n"
-                "Kinoni ko'rish uchun quyidagi tugmani bosing 👇",
+                "Kinoni ko'rish uchun quyidagi tugmani bosing. 👇",
                 reply_markup=await group_link_button(group_url),
                 protect_content=True,
                 parse_mode='HTML'
@@ -100,13 +98,12 @@ async def select_resolution_single(call: CallbackQuery, state: FSMContext):
     info += f"{product[2]}\n\n"
     info += f"📺 <b>Sifat:</b> {resolution.upper()}\n"
     info += f"💎 <b>Filmni tomosha qilish</b>: {format_price(price)} so'm\n\n"
-    info += "Davom etish uchun quyidagi tugmalardan foydalaning."
+    info += "Davom etish uchun quyidagi tugmalardan foydalaning. 👇"
 
     await call.message.answer(f"\"{product[1]}\" filmidan qisqa lavha", reply_markup=back_button)
     await call.message.answer_video(
         video=video,
         caption=info,
-        # callback_data ichida barcha ma'lumotlar bor
         reply_markup=await user_product_buttons(product_id, resolution, int(price)),
         parse_mode='HTML'
     )
@@ -168,7 +165,7 @@ async def product_buy_func(call: CallbackQuery):
 
 
 # ==================== HAMMA FILMLAR - RESOLUTION TANLASH ====================
-@dp.callback_query(ProductStates.select_resolution_all, lambda call: call.data.startswith('all_res_'))
+@dp.callback_query(lambda call: call.data.startswith('all_res_'))
 async def select_resolution_all(call: CallbackQuery, state: FSMContext):
     resolution = call.data.replace('all_res_', '')
     await call.message.delete()
@@ -216,7 +213,7 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
     info += f"<b>📦 Umumiy filmlar soni:</b> {len(unpurchased)} ta\n"
     info += f"<b>💰 Umumiy qiymat:</b> <s>{format_price(total_price)}</s> so'm\n"
     info += f"<b>💎 Chegirmadan keyingi narx:</b> <b>{format_price(discount_price)} so'm</b>\n\n"
-    info += "Davom etish uchun quyidagi tugmadan foydalaning."
+    info += "Davom etish uchun quyidagi tugmadan foydalaning. 👇"
 
 
     products_str = ".".join(map(str, products_ids))

@@ -62,14 +62,16 @@ def get_all_payment_buttons(products_str, resolution, price):
 
 # ==================== RESOLUTION TANLASH ====================
 
-resolution_buttons = InlineKeyboardBuilder(
+async def resolution_buttons(pr_id):
+    buttons = InlineKeyboardBuilder(
     markup=[
         [
-            InlineKeyboardButton(text="📺 1080p", callback_data="res_1080p"),
-            InlineKeyboardButton(text="📺 4K", callback_data="res_4k"),
+            InlineKeyboardButton(text="📺 1080p", callback_data=f"res_1080p_{pr_id}"),
+            InlineKeyboardButton(text="📺 4K", callback_data=f"res_4k_{pr_id}"),
         ]
     ]
-).adjust(2).as_markup()
+    ).adjust(2).as_markup()
+    return buttons
 
 
 all_resolution_buttons = InlineKeyboardBuilder(
@@ -87,7 +89,7 @@ all_resolution_buttons = InlineKeyboardBuilder(
 async def group_link_button(link):
     return InlineKeyboardBuilder(
         markup=[
-            [InlineKeyboardButton(text="Guruhga qo'shilish", url=link)]
+            [InlineKeyboardButton(text="👉 Guruhga qo'shilish 👈", url=link)]
         ]
     ).adjust(1).as_markup()
 
