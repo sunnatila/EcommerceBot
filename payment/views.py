@@ -1,4 +1,4 @@
-from asgiref.sync import sync_to_async
+from asgiref.sync import async_to_sync
 from click_up.views import ClickWebhook
 from click_up.models import ClickTransaction
 from paytechuz.integrations.django.views import BasePaymeWebhookView
@@ -27,7 +27,7 @@ async def send_url_func(data):
             protect_content=True,
         )
 
-send_url_to_user = sync_to_async(send_url_func)
+send_url_to_user = async_to_sync(send_url_func)
 
 
 class PaymeWebhookView(BasePaymeWebhookView):
