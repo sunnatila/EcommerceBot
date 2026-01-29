@@ -60,7 +60,7 @@ async def select_film_from_my_films(msg: Message, state: FSMContext):
     )
 
 
-# myfilm_{product_id}_{resolution}
+
 @dp.callback_query(lambda call: call.data.startswith('myfilm_'))
 async def select_resolution_my_film(call: CallbackQuery, state: FSMContext):
     parts = call.data.split('_')
