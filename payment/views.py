@@ -16,6 +16,7 @@ async def send_url_func(user_tg_id, url):
         reply_markup=await group_link_button(url),
         protect_content=True,
     )
+    await bot.session.close()
 
 send_url_to_user = async_to_sync(send_url_func)
 
