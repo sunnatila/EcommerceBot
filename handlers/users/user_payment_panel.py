@@ -49,9 +49,9 @@ async def get_product_id(msg: Message, state: FSMContext):
 
     await state.update_data(product_id=data[0])
     await msg.answer(
-        "📺 <b>Qaysi sifatda tomosha qilmoqchisiz?</b>\n\n"
-        "1080p - standart sifat\n"
-        "4K - yuqori sifat",
+        f"📺 <b>Qaysi sifatda tomosha qilmoqchisiz?</b>\n\n"
+        f"1080p - standart sifat.\n💎 Tomosha narxi: {format_price(data[9])} so'm\n"
+        f"4K - yuqori sifat.\n💎 Tomosha narxi: {format_price(data[10])} so'm",
         reply_markup=resolution_buttons,
         parse_mode='HTML'
     )
@@ -99,7 +99,7 @@ async def select_resolution_single(call: CallbackQuery, state: FSMContext):
     info = f"<b>{product[1]}</b>\n\n"
     info += f"{product[2]}\n\n"
     info += f"📺 <b>Sifat:</b> {resolution.upper()}\n"
-    info += f"💎 <b>Narxi:</b> {format_price(price)} so'm\n\n"
+    info += f"💎 <b>Filmni tomosha qilish</b>: {format_price(price)} so'm\n\n"
     info += "Davom etish uchun quyidagi tugmalardan foydalaning."
 
     await call.message.answer(f"\"{product[1]}\" filmidan qisqa lavha", reply_markup=back_button)
@@ -194,8 +194,9 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
         return
 
     total_price = 0
-    info = f"<b>🎁 Barcha filmlar - {resolution.upper()} sifatda</b>\n\n"
-    info += "<b>20% chegirma bilan tomosha qiling!</b>\n\n"
+    info = f"<b>🎁 Barcha filmlar uchun maxsus taklif</b>\n\n"
+    info += f"<b> Barcha filmlar - {resolution.upper()} sifatda</b>\n\n"
+    info += "<b>Filmlar bo‘limidagi barcha filmlarni 20% chegirma bilan tomosha qilish imkoniyati.</b>\n\n"
 
     products_ids = []
     for i, product in enumerate(unpurchased, 1):
@@ -212,12 +213,12 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
 
     discount_price = int(total_price * 0.8)
 
-    info += f"<b>📦 Filmlar soni:</b> {len(unpurchased)} ta\n"
-    info += f"<b>💰 Umumiy narx:</b> <s>{format_price(total_price)}</s> so'm\n"
-    info += f"<b>💎 To'lov summasi:</b> <b>{format_price(discount_price)} so'm</b>\n\n"
+    info += f"<b>📦 Umumiy filmlar soni:</b> {len(unpurchased)} ta\n"
+    info += f"<b>💰 Umumiy qiymat:</b> <s>{format_price(total_price)}</s> so'm\n"
+    info += f"<b>💎 Chegirmadan keyingi narx:</b> <b>{format_price(discount_price)} so'm</b>\n\n"
     info += "Davom etish uchun quyidagi tugmadan foydalaning."
 
-    # products_ids ni stringga aylantirish: "1.2.3.4" (vergul o'rniga nuqta)
+
     products_str = ".".join(map(str, products_ids))
 
     await call.message.answer(
@@ -228,7 +229,7 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
     await call.answer()
 
 
-# ==================== HAMMA FILMLAR - SOTIB OLISH (STATE'SIZ) ====================
+# ==================== HAMMA FILMLAR - SOTIB OLISH ====================
 # allbuy_{products_str}_{resolution}_{price}
 @dp.callback_query(lambda call: call.data.startswith('allbuy_'))
 async def send_all_payment_method(call: CallbackQuery):
