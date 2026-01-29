@@ -16,9 +16,9 @@ async def send_url_func(data):
     if count == 1:
         pr_data = await db.get_product(product)
         if resolution == "1080p":
-            pr_url = pr_data[0][7]
+            pr_url = pr_data[7]
         else:
-            pr_url = pr_data[0][8]
+            pr_url = pr_data[8]
 
         await bot.send_message(
             chat_id=user,
