@@ -64,7 +64,7 @@ class ClickWebhookAPIView(ClickWebhook):
         order.is_paid = True
         order.save()
         data = {
-            "order_id": order.id,
+            "user": order.user.tg_id,
             "product": order.product,
             "count": order.count,
             "resolution": order.resolution,
