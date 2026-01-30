@@ -29,8 +29,8 @@ admin_video_buttons = ReplyKeyboardBuilder(
 admin_film_buttons = ReplyKeyboardBuilder(
     markup = [
         [
-            KeyboardButton(text="📋 Film qo'shish"),
-            KeyboardButton(text="📋 Filmlar ro'yxati"),
+            KeyboardButton(text="🎞 Film qo'shish"),
+            KeyboardButton(text="🎞 Filmlar ro'yxati"),
             KeyboardButton(text="🔙 Ortga")
         ]
     ]

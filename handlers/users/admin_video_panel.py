@@ -1,13 +1,12 @@
 from aiogram.enums import ContentType
 from aiogram.filters import StateFilter
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from handlers.users.start import AdminFilter
 from keyboards.default import admin_video_buttons, admin_button
 from keyboards.inline import admin_settings_button
 from loader import dp, db
-from states import GroupStates
 
 
 @dp.message(AdminFilter(), lambda msg: msg.text == "🎞 Videolar bo'limi")

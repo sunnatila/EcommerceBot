@@ -17,7 +17,7 @@ from states import GroupStates
 LINK_REGEX = r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)|https?://t\.me/[\w\+\-]+"
 
 
-@dp.message(AdminFilter(), lambda msg: msg.text == "📋 Filmlar bo'limi")
+@dp.message(AdminFilter(), lambda msg: msg.text == "🎞 Filmlar bo'limi")
 async def film_panel(msg: types.Message):
     await msg.answer("Filmlar bo'limida kerak bo'lgan tugmachani bosing.", reply_markup=admin_film_buttons)
 
@@ -30,7 +30,7 @@ async def admin_panel(msg: types.Message, state: FSMContext):
 
 # ==================== FILM QO'SHISH ====================
 
-@dp.message(AdminFilter(), lambda msg: msg.text == "📋 Film qo'shish")
+@dp.message(AdminFilter(), lambda msg: msg.text == "🎞 Film qo'shish")
 async def add_group(msg: Union[types.Message, CallbackQuery], state: FSMContext, pr_id=None):
     if isinstance(msg, CallbackQuery):
         await msg.message.answer("Film nomini kiriting:")
@@ -202,7 +202,7 @@ async def film_save(call: CallbackQuery, state: FSMContext):
 
 # ==================== FILMLAR RO'YXATI ====================
 
-@dp.message(AdminFilter(), lambda msg: msg.text == "📋 Filmlar ro'yxati")
+@dp.message(AdminFilter(), lambda msg: msg.text == "🎞 Filmlar ro'yxati")
 async def send_groups_list(msg: types.Message, state: FSMContext):
     await msg.answer("Qaysi filmni ma'lumotini ko'rmoqchisiz?", reply_markup=await get_product_list())
     await state.set_state("get_film_id")
