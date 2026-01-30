@@ -236,3 +236,28 @@ class Database:
     async def delete_admin(self, admin_id):
         query = "DELETE FROM admin_users WHERE id=%s"
         await self.execute(query, (admin_id,))
+
+
+
+    # ========================== VIDEO FUNCTIONS =======================================
+
+    async def add_video(self, video_url, desc):
+        query = "INSERT INTO videos(video_url, video_description) VALUES(%s, %s)"
+        await self.execute(query, (video_url, desc))
+
+
+    async def update_video_info(self, pk, video_url, desc):
+        query = "UPDATE videos SET video_url=%s, video_description=%s WHERE id=%s"
+        await self.execute(query, (video_url, desc, pk))
+
+
+    async def delete_video(self, pk):
+        query = "DELETE FROM videos WHERE id=%s"
+        await self.execute(query, (pk,))
+
+
+    async def get_videos(self):
+        query = "SELECT * FROM videos"
+        return await self.execute(query, fetchall=True)
+
+

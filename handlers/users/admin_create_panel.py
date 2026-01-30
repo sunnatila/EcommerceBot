@@ -37,7 +37,6 @@ async def get_admin_username(msg: Message, state: FSMContext):
     username = msg.text
     data = await state.get_data()
     admin_id = data.get("admin_id")
-    print(admin_id)
     if admin_id:
         await db.update_admin_info(admin_id, username)
         await msg.answer("Admin muvaffaqiyatli tarzda o'zgartirildi.", reply_markup=admin_create_buttons)

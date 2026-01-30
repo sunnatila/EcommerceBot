@@ -3,6 +3,7 @@ from . import start
 from . import admin_films_panel
 from . import admin_create_panel
 from . import admin_user_add_panel
+from . import admin_video_panel
 from . import user_payment_panel
 from . import user_orders_panel
 from . import user_admin_contact_panel

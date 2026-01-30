@@ -55,13 +55,10 @@ async def get_phone_number_contact(msg: types.Message, state: FSMContext):
     fullname = data.get("fullname")
     user_data = await db.get_user_by_phone(phone_number)
     await state.clear()
+    video_data = await db.get_videos()
     if user_data and user_data[2] is None:
         await db.update_user(fullname, phone_number, msg.from_user.id)
-        await msg.answer(
-            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
-            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
-            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
-        )
+        await _send_success_message(msg, user_buttons, video_data)
 
 
     elif user_data and user_data[2]:
@@ -71,41 +68,38 @@ async def get_phone_number_contact(msg: types.Message, state: FSMContext):
 
     else:
         await db.add_user(fullname, phone_number, msg.from_user.id)
-        await msg.answer(
-            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
-            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
-            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
-        )
+        await _send_success_message(msg, user_buttons, video_data)
 
 
 @dp.message(StateFilter("get_phone_number"))
 async def get_phone_number_text(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
-    phone_number = msg.text
-    if phone_number.startswith('+998') and phone_number[4:].isdigit() and len(phone_number) == 13:
-        pass
-    elif phone_number.isdigit() and len(phone_number) == 9:
-        phone_number = '+998' + phone_number
-    else:
+
+    phone_number = msg.text.strip()
+
+    if not _is_valid_phone(phone_number):
         await msg.answer(
             "❌ Telefon raqam noto'g'ri kiritildi.\n"
             "Iltimos, telefon raqamingizni qaytadan kiriting (namuna: +99890xxxxxxx yoki 90xxxxxxx).\n"
-            "Yoki pastdagi tugmachani bosing 👇", reply_markup=contact_button
+            "Yoki pastdagi tugmachani bosing 👇",
+            reply_markup=contact_button
         )
         return
 
+    if phone_number.isdigit() and len(phone_number) == 9:
+        phone_number = '+998' + phone_number
+
     fullname = data.get("fullname")
     user_data = await db.get_user_by_phone(phone_number)
+    video_data = await db.get_videos()
+
+
     if user_data and user_data[2] is None:
         await db.update_user(fullname, phone_number, msg.from_user.id)
-        await msg.answer(
-            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
-            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
-            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
-        )
+        await _send_success_message(msg, user_buttons, video_data)
 
-    elif user_data[2]:
+    elif user_data and user_data[2]:
         await msg.answer(
             "Bu raqamga tegishli foydalanuvchi mavjud 😊",
             reply_markup=ReplyKeyboardRemove()
@@ -113,8 +107,30 @@ async def get_phone_number_text(msg: types.Message, state: FSMContext):
 
     else:
         await db.add_user(fullname, phone_number, msg.from_user.id)
-        await msg.answer(
-            "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
-            "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
-            "Kerakli bo'limni tanlang 😊", reply_markup=user_buttons
+        await _send_success_message(msg, user_buttons, video_data)
+
+
+def _is_valid_phone(phone_number: str) -> bool:
+    if phone_number.startswith('+998') and phone_number[4:].isdigit() and len(phone_number) == 13:
+        return True
+    elif phone_number.isdigit() and len(phone_number) == 9:
+        return True
+    return False
+
+
+async def _send_success_message(msg: types.Message, keyboard, video_data: list):
+    await msg.answer(
+        "Tabriklaymiz! Ro'yxatdan muvaffaqiyatli o'tdingiz ✅\n"
+        "Endi botdan to'liq tarzda foydalanishingiz mumkin.\n\n"
+        "Kerakli bo'limni tanlang 😊",
+        reply_markup=keyboard
+    )
+
+    if video_data:
+        video_url = video_data[0][1]
+        video_desc = video_data[0][2]
+        await msg.answer_video(
+            video=video_url,
+            caption=video_desc,
+            parse_mode='HTML'
         )

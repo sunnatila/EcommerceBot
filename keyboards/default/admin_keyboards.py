@@ -6,9 +6,21 @@ from loader import db
 admin_button = ReplyKeyboardBuilder(
     markup=[
         [
-            KeyboardButton(text="📋 Filmlar bo'limi"),
+            KeyboardButton(text="🎞 Filmlar bo'limi"),
             KeyboardButton(text="👤 Adminlar bo'limi"),
             KeyboardButton(text="👤 Foydalanuvchilar bo'limi"),
+            KeyboardButton(text="🎞 Videolar bo'limi"),
+        ]
+    ]
+).adjust(2).as_markup(resize_keyboard=True)
+
+
+admin_video_buttons = ReplyKeyboardBuilder(
+    markup=[
+        [
+            KeyboardButton(text="🎞 Video qo'shish"),
+            KeyboardButton(text="🎞 Videolar ro'yxati"),
+            KeyboardButton(text="🔙 Ortga")
         ]
     ]
 ).adjust(2).as_markup(resize_keyboard=True)
