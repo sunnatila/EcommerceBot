@@ -10,9 +10,11 @@ from product.models import Order
 
 async def send_url_func(user_tg_id, url):
     """Foydalanuvchiga film URL ni yuborish"""
+    text=("Xaridingiz muvaffaqiyatli yakunlandi.\n"
+          "Filmni tomosha qilish uchun yopiq guruhga kirishingiz mumkin.")
     await bot.send_message(
         chat_id=user_tg_id,
-        text="Kinoni ko'rish uchun pastgi tugmachani bo'sing 👇",
+        text=text,
         reply_markup=await group_link_button(url),
         protect_content=True,
     )
