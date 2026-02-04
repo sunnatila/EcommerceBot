@@ -22,7 +22,7 @@ async def send_free_group_info(msg: Message, state: FSMContext):
     info = (
         f"<b>{data[1]}</b>\n\n"
         f"{data[2]}\n\n"
-        f"Kinoni ko‘rish uchun guruhga qo‘shilish tugmasini bosing 👇"
+        f"Marhamat guruhga qo'shilib. Filmni tomosha qiling ☺️"
     )
 
     await msg.answer_video(
