@@ -245,9 +245,14 @@ async def update_group(call: CallbackQuery, state: FSMContext):
     if call.data == "edit":
         await add_group(call, state, pr_id=data.get("product_id"))
     elif call.data == "delete":
-        await db.delete_product(data.get("product_id"))
-        await call.message.answer("Film muvaffaqiyatli o'chirildi.", reply_markup=admin_film_buttons)
-        await state.clear()
+        try:
+            await db.delete_product(data.get("product_id"))
+            await call.message.answer("Film muvaffaqiyatli o'chirildi.", reply_markup=admin_film_buttons)
+            await state.clear()
+        except:
+            await call.message.answer("Filmni ochira olmaysiz!!\n"
+                                      "Mijozlar sotib olishkan!!", reply_markup=admin_film_buttons)
+            await state.clear()
     elif call.data == "back":
         await call.message.answer("Qaysi filmni ma'lumotini ko'rmoqchisiz?", reply_markup=await get_product_list())
         await state.set_state("get_film_id")

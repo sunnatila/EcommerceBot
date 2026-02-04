@@ -81,9 +81,6 @@ class Database:
         return await self.execute(query, fetchall=True)
 
     async def delete_product(self, product_id):
-        # Avval orders_product dan bog'langan yozuvlarni o'chirish
-        await self.execute("DELETE FROM orders_product WHERE product_id=%s", (product_id,))
-        # Keyin mahsulotni o'chirish
         await self.execute("DELETE FROM products WHERE id=%s", (product_id,))
 
     # ==================== USER FUNCTIONS ====================
