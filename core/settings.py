@@ -88,21 +88,22 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'dj_db_conn_pool.backends.mysql',  # Connection pool
+        'ENGINE': 'dj_db_conn_pool.backends.mysql',
         'NAME': env.str("MYSQL_DATABASE"),
         'USER': env.str("MYSQL_USER"),
         'PASSWORD': env.str("MYSQL_PASSWORD"),
         'HOST': env.str("MYSQL_HOST"),
         'PORT': env.str("MYSQL_PORT"),
+        'CONN_MAX_AGE': 300,
+        'CONN_HEALTH_CHECKS': True,   # Django 4.1+ — har safar ulanishni tekshiradi
         'POOL_OPTIONS': {
-            'POOL_SIZE': 20,        # Doimiy 20 ta ulanish
-            'MAX_OVERFLOW': 30,     # Qo'shimcha 30 ta (jami 50)
-            'RECYCLE': 300,         # 5 daqiqada yangilanadi
-            'PRE_PING': True,       # "Server has gone away" oldini oladi
+            'POOL_SIZE': 20,
+            'MAX_OVERFLOW': 30,
+            'RECYCLE': 120,        # 2 daqiqaga tushiring
+            'PRE_PING': True,
         }
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 

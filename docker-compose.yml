@@ -25,6 +25,7 @@ services:
     image: mysql:8.0
     container_name: mysql
     restart: always
+    command: --wait-timeout=28800 --interactive-timeout=28800 --max-connections=200
     env_file:
       - envs/.env
     volumes:

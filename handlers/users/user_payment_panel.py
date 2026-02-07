@@ -51,8 +51,8 @@ async def get_product_id(msg: Message, state: FSMContext):
     await state.update_data(product_id=data[0])
     await msg.answer(
         f"📺 <b>Qaysi sifatda tomosha qilishni xohlaysiz?</b>\n\n"
-        f"🎬 1080p - Yuqori sifat.\n💎 Gadjetlar uchun\n💎 Tomosha narxi: {format_price(data[9])} so'm\n\n"
-        f"✨ 4K - Maksimal aniqlik.\n💎 TV va Kompyuterlar uchun\n💎 Tomosha narxi: {format_price(data[10])} so'm",
+        f"🎬 1080p - Yuqori sifat.\n💎 Gadjetlar uchun\n💸 Tomosha narxi: {format_price(data[9])} so'm\n\n"
+        f"✨ 4K - Maksimal aniqlik.\n💎 TV va Kompyuterlar uchun\n💸 Tomosha narxi: {format_price(data[10])} so'm",
         reply_markup=await resolution_buttons(pr_id=data[0]),
         parse_mode='HTML'
     )
