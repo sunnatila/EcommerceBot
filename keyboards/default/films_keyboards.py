@@ -4,10 +4,9 @@ from loader import db
 
 async def get_active_products():
     products = await db.get_active_products()
-
     keyboard = []
-
-    keyboard.append([KeyboardButton(text="🎁 Chegirma bilan olish")])
+    if len(products) >= 4:
+        keyboard.append([KeyboardButton(text="🎁 Chegirma bilan olish")])
 
 
     row = []
