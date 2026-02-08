@@ -1,9 +1,8 @@
 from datetime import datetime
 import aiomysql
 from environs import Env
-import logging
 
-logger = logging.getLogger(__name__)
+
 env = Env()
 env.read_env('./envs/.env')
 
@@ -29,10 +28,8 @@ class Database:
     async def execute(self, query, args: tuple = (), fetchone=False, fetchall=False):
         if self.pool is None:
             await self.connect()
-            logger.info("🔌 Database pool yaratildi")
 
         async with self.pool.acquire() as conn:
-            logger.debug(f"📡 Connection olindi (id: {id(conn)})")
             async with conn.cursor() as cur:
                 await cur.execute(query, args)
                 if fetchone:
