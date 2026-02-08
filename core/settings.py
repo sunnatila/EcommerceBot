@@ -94,7 +94,7 @@ DATABASES = {
         'PASSWORD': env.str("MYSQL_PASSWORD"),
         'HOST': env.str("MYSQL_HOST"),
         'PORT': env.str("MYSQL_PORT"),
-        'CONN_MAX_AGE': 300,
+        'CONN_MAX_AGE': 0,
         'CONN_HEALTH_CHECKS': True,   # Django 4.1+ — har safar ulanishni tekshiradi
         'POOL_OPTIONS': {
             'POOL_SIZE': 20,
