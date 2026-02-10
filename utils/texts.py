@@ -21,28 +21,20 @@ def get_text(key: str, default: str = "") -> str:
 
 
 async def get_text_with_admin(key: str, db, default: str = "") -> str:
-    """
-    Textni olish va {admin_username} ni bazadan admin username bilan almashtirish.
-
-    JSON da shunday yozing: "... {admin_username} ga yuboring."
-    Natija: "... @real_admin_username ga yuboring."
-    """
     texts = load_texts()
     text = texts.get(key, default)
 
-    # Agar {admin_username} bo'lsa, bazadan olish
     if "{admin_username}" in text:
         admins = await db.get_admins()
         if admins and len(admins) > 0:
-            # Birinchi adminning username'ini olish
-            # admin_users jadvalida: id, username
-            admin_username = admins[0][1]  # index'ni tekshiring!
+            admin_username = admins[0][1]
             if admin_username:
-                # @ belgisi yo'q bo'lsa qo'shish
                 if not admin_username.startswith("@"):
                     admin_username = f"@{admin_username}"
                 text = text.replace("{admin_username}", admin_username)
-
+        else:
+            admin_username = "@phd_tv_admin"
+            text = text.replace("{admin_username}", admin_username)
     return text
 
 

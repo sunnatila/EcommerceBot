@@ -6,7 +6,10 @@ from loader import db, dp
 async def send_admin_contact(msg: Message):
     admin_data = await db.get_admins()
     if admin_data:
-        username = admin_data[0][1]
+        if admin_data[0][1].startswith("@"):
+            username = admin_data[0][1]
+        else:
+            username = f"@{admin_data[0][1]}"
     else:
         username = "@phd_tv_admin"
     await msg.answer(
