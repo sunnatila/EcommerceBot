@@ -1,6 +1,7 @@
 from asgiref.sync import async_to_sync
 from click_up.views import ClickWebhook
 from click_up.models import ClickTransaction
+from django.db import close_old_connections
 from paytechuz.integrations.django.views import BasePaymeWebhookView
 
 from keyboards.inline import group_link_button
@@ -26,6 +27,7 @@ send_url_to_user = async_to_sync(send_url_func)
 class PaymeWebhookView(BasePaymeWebhookView):
 
     def successfully_payment(self, params, transaction_obj):
+        close_old_connections()
         order = Order.objects.get(id=transaction_obj.account_id)
         order.is_paid = True
         order.save()
@@ -44,6 +46,7 @@ class PaymeWebhookView(BasePaymeWebhookView):
 
 
     def cancelled_payment(self, params, transaction_obj):
+        close_old_connections()
         order = Order.objects.get(id=transaction_obj.account_id)
         order.is_paid = False
         order.save()
@@ -52,6 +55,7 @@ class PaymeWebhookView(BasePaymeWebhookView):
 
 class ClickWebhookAPIView(ClickWebhook):
     def successfully_payment(self, params):
+        close_old_connections()
         """
         successfully payment method process you can ovveride it
         """
@@ -75,6 +79,7 @@ class ClickWebhookAPIView(ClickWebhook):
                     send_url_to_user(order.user.tg_id, url)
 
     def cancelled_payment(self, params):
+        close_old_connections()
         """
         cancelled payment method process you can ovveride it
         """

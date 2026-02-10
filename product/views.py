@@ -1,4 +1,6 @@
 from click_up import ClickUp
+from django.db import close_old_connections
+
 from core import settings
 from .serializers import OrderSerializer
 from asgiref.sync import sync_to_async
@@ -14,6 +16,7 @@ click_up = ClickUp(
 
 
 def _send_payment_url(data: dict):
+    close_old_connections()
     serializer_class = OrderSerializer
     serializer = serializer_class(data=data)
     serializer.is_valid(raise_exception=True)
