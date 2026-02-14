@@ -79,4 +79,16 @@ product_paid_button = InlineKeyboardBuilder(
 
 
 
+async def resolution_buttons_for_admin():
+    buttons = InlineKeyboardBuilder(
+    markup=[
+        [
+            InlineKeyboardButton(text="📺 1080p", callback_data=f"res_1080p"),
+            InlineKeyboardButton(text="📺 4K", callback_data=f"res_4k"),
+        ]
+    ]
+    ).adjust(2).as_markup()
+    return buttons
+
+
 

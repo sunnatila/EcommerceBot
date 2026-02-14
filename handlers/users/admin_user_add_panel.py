@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from keyboards.default import admin_button, get_users_panel_buttons, get_products_for_admin
-from keyboards.inline import resolution_buttons
+from keyboards.inline import resolution_buttons_for_admin
 from .start import AdminFilter
 from loader import db, dp
 
@@ -55,7 +55,7 @@ async def get_paid_sum(msg: Message, state: FSMContext):
     await state.update_data(cost=float(msg.text))
     await msg.answer(
         "📺 Qaysi sifatda ruxsat bermoqchisiz?",
-        reply_markup=resolution_buttons
+        reply_markup=await resolution_buttons_for_admin()
     )
     await state.set_state("get_resolution")
 
