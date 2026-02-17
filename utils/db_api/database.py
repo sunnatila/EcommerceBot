@@ -265,3 +265,22 @@ class Database:
         return await self.execute(query, fetchall=True)
 
 
+    # ============================ BOT FUNCTIONS ========================================
+
+    async def add_bot_start(self, tg_id, fullname, username):
+        sql = """
+              INSERT INTO bot_starts (tg_id, fullname, username, started_at)
+            VALUES (%s, %s, %s, %s)
+              """
+        await self.execute(sql, (tg_id, fullname, username, datetime.now().date()))
+
+    async def is_started(self, tg_id):
+        sql = "SELECT 1 FROM bot_starts WHERE tg_id = %s"
+        result = await self.execute(sql, (str(tg_id),), fetchone=True)
+        return result is not None
+
+    async def get_all_starts(self):
+        sql = "SELECT tg_id, fullname, username, started_at FROM bot_starts ORDER BY started_at DESC"
+        return await self.execute(sql, fetchall=True)
+
+

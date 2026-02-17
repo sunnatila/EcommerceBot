@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, AdminUser
+from .models import User, AdminUser, BotStartUser
 
 
 @admin.register(User)
@@ -10,3 +10,9 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(AdminUser)
 class AdminUser(admin.ModelAdmin):
     list_display = ['id', 'username']
+
+
+@admin.register(BotStartUser)
+class BotStartUser(admin.ModelAdmin):
+    list_display = ['id', 'tg_id', 'fullname', 'username', 'started_at']
+

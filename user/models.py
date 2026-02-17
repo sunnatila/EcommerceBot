@@ -39,3 +39,21 @@ class AdminUser(models.Model):
 
     class Meta:
         db_table = "admin_users"
+
+
+
+
+class BotStartUser(models.Model):
+    tg_id = models.CharField(max_length=50, null=True, blank=True)
+    fullname = models.CharField(max_length=255, null=True, blank=True)
+    username = models.CharField(max_length=255, null=True, blank=True)
+    started_at = models.DateField(auto_now=True, null=True, blank=True)
+
+
+    def __str__(self):
+        return f"{self.pk} - {self.fullname}"
+
+
+
+    class Meta:
+        db_table = "bot_starts"

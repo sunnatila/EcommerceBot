@@ -10,6 +10,7 @@ admin_button = ReplyKeyboardBuilder(
             KeyboardButton(text="👤 Adminlar bo'limi"),
             KeyboardButton(text="👤 Foydalanuvchilar bo'limi"),
             KeyboardButton(text="🎞 Videolar bo'limi"),
+            KeyboardButton(text="📊 Start bosganlar")
         ]
     ]
 ).adjust(2).as_markup(resize_keyboard=True)

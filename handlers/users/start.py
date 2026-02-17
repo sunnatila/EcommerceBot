@@ -24,10 +24,18 @@ async def admin_start(message: types.Message, state: FSMContext):
 
 @dp.message(CommandStart())
 async def user_start(message: types.Message, state: FSMContext):
+    user_status = await db.is_started(message.from_user.id)
+    if not user_status:
+        await db.add_bot_start(
+            message.from_user.id,
+            message.from_user.full_name,
+            message.from_user.username
+        )
     data = await db.get_user_by_tg_id(message.from_user.id)
     if data:
         await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
         return
+
     await message.answer(
         "Assalomu alaykum!\n"
         "PhD TV ga xush kelibsiz 😊\n\n"
