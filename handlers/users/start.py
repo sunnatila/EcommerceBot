@@ -40,25 +40,30 @@ async def user_start(message: types.Message, state: FSMContext):
         user_data_from_username = await db.get_user_by_username(username)
 
         if user_data_from_username:
-            if user_data_from_username[2]:
-                await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
-            else:
-                await db.update_user(tg_id=message.from_user.id, fullname=message.from_user.full_name, username=username)
+            if not user_data_from_username[2]:
+                await db.update_user(tg_id=message.from_user.id, fullname=message.from_user.full_name,
+                                     username=username)
                 await message.answer(
                     text="Assalomu alaykum!\n"
-                    "PhD TV ga xush kelibsiz.\n"
-                    "Kerakli bo'limni tanlang 😊\n",
+                         "PhD TV ga xush kelibsiz.\n"
+                         "Kerakli bo'limni tanlang 😊\n",
                     reply_markup=user_buttons
                 )
-        elif user_data_from_tg_id:
-            if user_data_from_tg_id[2]:
-                await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
+
             else:
+                await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
+
+        elif user_data_from_tg_id:
+            if not user_data_from_tg_id[2]:
                 await db.update_user_by_tg_id(tg_id=message.from_user.id, fullname=message.from_user.full_name, username=username)
                 await message.answer(
                     text="Kerakli bo'limni tanlang 😊",
                     reply_markup=user_buttons
                 )
+
+            else:
+                await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
+
         else:
             await db.add_user(tg_id=message.from_user.id, fullname=message.from_user.full_name, username=username)
             await message.answer(
