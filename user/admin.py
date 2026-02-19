@@ -4,7 +4,7 @@ from .models import User, AdminUser, BotStartUser
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'fullname', 'phone_number', 'tg_id']
+    list_display = ['id', 'fullname', 'username', 'tg_id']
 
 
 @admin.register(AdminUser)

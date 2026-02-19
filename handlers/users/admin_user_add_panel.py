@@ -22,26 +22,20 @@ async def back_to_menu(msg: Message, state: FSMContext):
 
 @dp.message(AdminFilter(), lambda msg: msg.text == "👤 Foydalanuvchiga film qo'shish")
 async def add_user(msg: Message, state: FSMContext):
-    await msg.answer("Foydalanuvchini kontaktini kiriting yoki tashlang:")
-    await state.set_state("user_contact_get")
+    await msg.answer("Foydalanuvchini username ni kiriting:")
+    await state.set_state("user_username_get")
 
 
-@dp.message(AdminFilter(), StateFilter("user_contact_get"))
-async def user_contact_get(msg: Message, state: FSMContext):
-    text = msg.contact.phone_number if msg.contact else msg.text
+@dp.message(AdminFilter(), StateFilter("user_username_get"))
+async def user_username_get(msg: Message, state: FSMContext):
+    text = msg.text
 
-    if text.startswith('+998') and text[4:].isdigit() and len(text) == 13:
+    if text.startswith('@'):
         pass
-    elif text.isdigit() and len(text) == 9:
-        text = '+998' + text
     else:
-        await msg.answer(
-            "❌ Telefon raqam noto'g'ri kiritildi.\n"
-            "Iltimos, telefon raqamini qaytadan kiriting (namuna: +99890xxxxxxx yoki 90xxxxxxx)."
-        )
-        return
+        text = '@' + text
 
-    await state.update_data(contact=text)
+    await state.update_data(username=text)
     await msg.answer("To'langan summani kiriting:")
     await state.set_state("get_paid_sum")
 
@@ -75,12 +69,12 @@ async def get_resolution(call: CallbackQuery, state: FSMContext):
 @dp.message(AdminFilter(), StateFilter("groups_get"))
 async def groups_get(msg: Message, state: FSMContext):
     data = await state.get_data()
-    contact = data.get("contact")
+    username = data.get("username")
     cost = data.get("cost")
     resolution = data.get("resolution")
     text = msg.text
 
-    user_info = await db.get_user_by_phone(contact)
+    user_info = await db.get_user_by_username(username)
 
     # ==================== BITTA FILM ====================
     if text != "Hamma filmlarga ruxsat berish":
@@ -94,10 +88,10 @@ async def groups_get(msg: Message, state: FSMContext):
 
         # Yangi foydalanuvchi
         if not user_info:
-            await db.add_user_by_admin(contact, cost, [product_id], resolution)
+            await db.add_user_by_admin(username, cost, [product_id], resolution)
             await msg.answer(
                 f"✅ <b>Muvaffaqiyatli!</b>\n\n"
-                f"📱 Telefon: <code>{contact}</code>\n"
+                f"📱 Username: <code>{username}</code>\n"
                 f"🎬 Film: <b>{product_title}</b>\n"
                 f"📺 Sifat: <b>{resolution.upper()}</b>\n"
                 f"💰 To'lov: <b>{format_price(cost)} so'm</b>",
@@ -122,7 +116,7 @@ async def groups_get(msg: Message, state: FSMContext):
         await db.add_order(user_id, product_id, cost, resolution)
         await msg.answer(
             f"✅ <b>Ruxsat berildi!</b>\n\n"
-            f"📱 Telefon: <code>{contact}</code>\n"
+            f"📱 Username: <code>{username}</code>\n"
             f"🎬 Film: <b>{product_title}</b>\n"
             f"📺 Sifat: <b>{resolution.upper()}</b>\n"
             f"💰 To'lov: <b>{format_price(cost)} so'm</b>",
@@ -139,10 +133,10 @@ async def groups_get(msg: Message, state: FSMContext):
 
     # Yangi foydalanuvchi
     if not user_info:
-        await db.add_user_by_admin(contact, cost, all_product_ids, resolution)
+        await db.add_user_by_admin(username, cost, all_product_ids, resolution)
         await msg.answer(
             f"✅ <b>Muvaffaqiyatli!</b>\n\n"
-            f"📱 Telefon: <code>{contact}</code>\n"
+            f"📱 Username: <code>{username}</code>\n"
             f"🎬 Filmlar: <b>{total_films} ta</b>\n"
             f"📺 Sifat: <b>{resolution.upper()}</b>\n"
             f"💰 To'lov: <b>{format_price(cost)} so'm</b>",
@@ -171,7 +165,7 @@ async def groups_get(msg: Message, state: FSMContext):
 
     await msg.answer(
         f"✅ <b>Ruxsat berildi!</b>\n\n"
-        f"📱 Telefon: <code>{contact}</code>\n"
+        f"📱 Username: <code>{username}</code>\n"
         f"🎬 Yangi filmlar: <b>{len(new_products)} ta</b>\n"
         f"📺 Sifat: <b>{resolution.upper()}</b>\n"
         f"💰 To'lov: <b>{format_price(cost)} so'm</b>",

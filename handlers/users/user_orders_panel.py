@@ -15,10 +15,20 @@ async def send_user_products(msg: Message, state: FSMContext):
         await msg.answer("Sizda hali sotib olingan filmlar yo'q.", reply_markup=user_buttons)
         return
 
-    user_id = user_row[0]
+    user_ids = [user[0] for user in user_row]
+    all_films = []
+    for user_id in user_ids:
+        films = await db.get_user_unique_films(user_id)
+        if films:
+            all_films.extend(films)
 
-    # Foydalanuvchi sotib olgan UNIKAL filmlar (resolution'siz)
-    unique_films = await db.get_user_unique_films(user_id)
+
+    seen = set()
+    unique_films = []
+    for film in all_films:
+        if film[1] not in seen:
+            seen.add(film[1])
+            unique_films.append(film)
 
     if not unique_films:
         await msg.answer("Sizda hali sotib olingan filmlar yo'q.", reply_markup=user_buttons)
@@ -38,7 +48,6 @@ async def back_from_my_films(msg: Message, state: FSMContext):
 async def select_film_from_my_films(msg: Message, state: FSMContext):
     film_name = msg.text.strip()
 
-    # Filmni topish
     product = await db.get_product_by_name(film_name)
     if not product:
         return
@@ -46,11 +55,16 @@ async def select_film_from_my_films(msg: Message, state: FSMContext):
     product_id = product[0]
     await state.update_data(selected_product_id=product_id, selected_product_name=film_name)
 
-    # Foydalanuvchi qaysi resolution'larda sotib olganini tekshirish
-    user_row = await db.get_user_by_tg_id(msg.from_user.id)
-    user_id = user_row[0]
 
-    purchased_resolutions = await db.get_user_purchased_resolutions(user_id, product_id)
+    user_row = await db.get_user_by_tg_id(msg.from_user.id)
+    user_ids = [user[0] for user in user_row]
+    purchased_resolutions = []
+    for user_id in user_ids:
+        res = await db.get_user_purchased_resolutions(user_id, product_id)
+        purchased_resolutions.extend(res)
+
+
+    purchased_resolutions = list(set(purchased_resolutions))
 
     await msg.answer(
         f"<b>{film_name}</b>\n\n"
@@ -70,14 +84,18 @@ async def select_resolution_my_film(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
 
     user_row = await db.get_user_by_tg_id(call.from_user.id)
-    user_id = user_row[0]
+    user_ids = [user[0] for user in user_row]
+    existing_order = ()
+    for user_id in user_ids:
+        result = await db.get_user_order(user_id, product_id, resolution)
+        if result:
+            existing_order = result
+            break
 
-    # Bu resolution'da sotib olganmi?
-    existing_order = await db.get_user_order(user_id, product_id, resolution)
     product = await db.get_product(product_id)
 
     if existing_order:
-        # Sotib olgan - guruh linkini berish
+
         if resolution == "4k":
             group_url = product[8]
         else:
@@ -91,7 +109,7 @@ async def select_resolution_my_film(call: CallbackQuery, state: FSMContext):
             protect_content = True,
         )
     else:
-        # Sotib olmagan
+
         await call.message.answer(
             f"❌ Siz <b>{product[1]}</b> filmini {resolution.upper()} sifatda hali sotib olmagansiz.\n\n"
             "Sotib olish uchun 🎬 Filmlar bo'limiga o'ting.",

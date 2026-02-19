@@ -9,7 +9,7 @@ from keyboards.inline import (
     get_payment_buttons, get_all_payment_buttons
 )
 from loader import dp, db
-from utils.texts import get_text, get_text_with_admin
+from utils.texts import get_text_with_admin
 from states import ProductStates
 
 
@@ -68,10 +68,9 @@ async def select_resolution_single(call: CallbackQuery, state: FSMContext):
     product_id = data.get('product_id')
 
     user_row = await db.get_user_by_tg_id(call.from_user.id)
-    user_id = user_row[0] if user_row else None
+    user_ids = [user[0] for user in user_row] if user_row else []
 
     product = await db.get_product(product_id)
-    # data: id, title, description, is_active, created_at, updated_at, video_url, 1080p url, 4k url, 1080p price, 4k price
 
     if resolution == "4k":
         price = float(product[10])
@@ -80,21 +79,25 @@ async def select_resolution_single(call: CallbackQuery, state: FSMContext):
         price = float(product[9])
         group_url = product[7]
 
-    # Sotib olganmi tekshirish
-    if user_id:
+
+    existing_order = None
+    for user_id in user_ids:
         existing_order = await db.get_user_order(user_id, product_id, resolution)
         if existing_order:
-            await call.message.answer(
-                f"✅ Siz bu filmni {resolution.upper()} sifatda allaqachon sotib olgansiz!\n\n"
-                "Kinoni ko'rish uchun quyidagi tugmani bosing. 👇",
-                reply_markup=await group_link_button(group_url),
-                protect_content=True,
-                parse_mode='HTML'
-            )
-            await state.set_state(ProductStates.products_page)
-            return
+            break
 
-    # Sotib olmagan - film ma'lumotini ko'rsatish
+    if existing_order:
+        await call.message.answer(
+            f"✅ Siz bu filmni {resolution.upper()} sifatda allaqachon sotib olgansiz!\n\n"
+            "Kinoni ko'rish uchun quyidagi tugmani bosing. 👇",
+            reply_markup=await group_link_button(group_url),
+            protect_content=True,
+            parse_mode='HTML'
+        )
+        await state.set_state(ProductStates.products_page)
+        return
+
+
     video = product[6]
     info = f"<b>{product[1]}</b>\n\n"
     info += f"{product[2]}\n\n"
@@ -150,7 +153,8 @@ async def product_buy_func(call: CallbackQuery):
         await call.message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
         return
 
-    user_id = (await db.get_user_by_tg_id(call.from_user.id))[0]
+    user_row = await db.get_user_by_tg_id(call.from_user.id)
+    user_id = user_row[0][0]
 
     payment_data = {
         "user": user_id,
@@ -174,10 +178,20 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
     await state.set_state(ProductStates.products_page)
 
     user_row = await db.get_user_by_tg_id(call.from_user.id)
-    user_id = user_row[0] if user_row else None
+    user_ids = [user[0] for user in user_row] if user_row else []
 
-    if user_id:
-        unpurchased = await db.get_unpurchased_products(user_id, resolution)
+
+    if user_ids:
+
+        all_purchased_ids = set()
+        for user_id in user_ids:
+            purchased = await db.get_user_purchased_products(user_id, resolution)
+            if purchased:
+                all_purchased_ids.update(p[0] for p in purchased)
+
+
+        all_products = await db.get_active_products()
+        unpurchased = [p for p in all_products if p[0] not in all_purchased_ids]
     else:
         unpurchased = await db.get_active_products()
 
@@ -192,10 +206,11 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
         await state.clear()
         return
 
+
     total_price = 0
     info = f"<b>🎁 Barcha filmlar uchun maxsus taklif</b>\n\n"
     info += f"<b> Barcha filmlar - {resolution.upper()} sifatda</b>\n\n"
-    info += "<b>Filmlar bo‘limidagi barcha filmlarni 20% chegirma bilan tomosha qilish imkoniyati.</b>\n\n"
+    info += "<b>Filmlar bo'limidagi barcha filmlarni 20% chegirma bilan tomosha qilish imkoniyati.</b>\n\n"
 
     products_ids = []
     for i, product in enumerate(unpurchased, 1):
@@ -203,30 +218,24 @@ async def select_resolution_all(call: CallbackQuery, state: FSMContext):
             price = float(product[10])
         else:
             price = float(product[9])
-
         total_price += price
         products_ids.append(product[0])
-
         info += f"{i}. <b>{product[1]}</b>\n"
         info += f"   <s>{format_price(price)}</s> → <b>{format_price(price * 0.8)} so'm</b>\n\n"
 
     discount_price = int(total_price * 0.8)
-
     info += f"<b>📦 Umumiy filmlar soni:</b> {len(unpurchased)} ta\n"
     info += f"<b>💰 Umumiy qiymat:</b> <s>{format_price(total_price)}</s> so'm\n"
     info += f"<b>💎 Chegirmadan keyingi narx:</b> <b>{format_price(discount_price)} so'm</b>\n\n"
     info += "Davom etish uchun quyidagi tugmadan foydalaning. 👇"
 
-
     products_str = ".".join(map(str, products_ids))
-
     await call.message.answer(
         info,
         reply_markup=await all_pr_buy_buttons(products_str, resolution, discount_price),
         parse_mode='HTML'
     )
     await call.answer()
-
 
 # ==================== HAMMA FILMLAR - SOTIB OLISH ====================
 # allbuy_{products_str}_{resolution}_{price}
@@ -252,25 +261,20 @@ async def all_product_buy_func(call: CallbackQuery):
     resolution = parts[3]
     price = int(parts[4])
 
-    # Nuqta bilan ajratilgan IDlarni listga aylantirish
     products_ids = [int(x) for x in products_str.split('.')]
-
-    user_data = await db.get_user_by_tg_id(call.from_user.id)
+    user_row = await db.get_user_by_tg_id(call.from_user.id)
+    user_data = user_row[0]
 
     if method == 'other':
         await call.message.delete()
-
         info = f"Hurmatli <b>{user_data[1]}</b>,\n\n"
         info += f"📺 <b>Sifat:</b> {resolution.upper()}\n\n"
         info += "Quyidagi filmlar uchun to'lov:\n\n"
-
         for i, product_id in enumerate(products_ids, 1):
             product = await db.get_product(product_id)
             info += f"<b>{i}. {product[1]}</b>\n"
-
         info += f"\n💰 <b>UMUMIY TO'LOV:</b> {format_price(price)} so'm\n\n"
         info += await get_text_with_admin("other_payment_info", db)
-
         await call.message.answer(info, parse_mode='HTML')
         await call.message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
         return
@@ -288,7 +292,6 @@ async def all_product_buy_func(call: CallbackQuery):
     payment_markup = await sent_payment_url(payment_data)
     await call.message.edit_reply_markup(reply_markup=payment_markup)
     await call.answer()
-
 
 def format_price(price):
     if price is None:

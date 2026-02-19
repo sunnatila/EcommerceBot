@@ -90,30 +90,37 @@ class Database:
 
     # ==================== USER FUNCTIONS ====================
 
-    async def add_user(self, fullname, phone_number, tg_id):
+    async def add_user(self, fullname, tg_id, username=None):
         query = """
-            INSERT INTO users(fullname, phone_number, tg_id, created_at)
+            INSERT INTO users(fullname, username, tg_id, created_at)
             VALUES (%s, %s, %s, %s)
         """
-        await self.execute(query, (fullname, phone_number, tg_id, datetime.now().date()))
+        await self.execute(query, (fullname, username, tg_id, datetime.now().date()))
 
-    async def update_user(self, fullname, phone_number, tg_id):
-        query = "UPDATE users SET fullname=%s, tg_id=%s WHERE phone_number=%s"
-        await self.execute(query, (fullname, tg_id, phone_number))
+    async def update_user(self, fullname, username, tg_id):
+        query = "UPDATE users SET fullname=%s, tg_id=%s WHERE username=%s"
+        await self.execute(query, (fullname, tg_id, username))
+
+    async def update_user_by_tg_id(self, fullname, username, tg_id):
+        query = "UPDATE users SET fullname=%s, username=%s WHERE tg_id=%s"
+        await self.execute(query, (fullname, username, tg_id))
+
 
     async def get_user_by_tg_id(self, tg_id):
-        query = "SELECT id, fullname FROM users WHERE tg_id=%s"
-        return await self.execute(query, (tg_id,), fetchone=True)
+        query = "SELECT id, fullname, username FROM users WHERE tg_id=%s"
+        return await self.execute(query, (tg_id,), fetchall=True)
 
-    async def get_user_by_phone(self, phone):
-        query = "SELECT id, fullname, tg_id FROM users WHERE phone_number=%s"
-        return await self.execute(query, (phone,), fetchone=True)
 
-    async def add_user_by_admin(self, phone_number, cost: float, groups: list, resolution: str):
-        user_add_query = "INSERT INTO users(phone_number, created_at) VALUES (%s, %s)"
-        await self.execute(user_add_query, (phone_number, datetime.now().date()))
+    async def get_user_by_username(self, username):
+        query = "SELECT id, fullname, tg_id FROM users WHERE username=%s"
+        return await self.execute(query, (username,), fetchone=True)
 
-        user_id = (await self.get_user_by_phone(phone_number))[0]
+
+    async def add_user_by_admin(self, username, cost: float, groups: list, resolution: str):
+        user_add_query = "INSERT INTO users(username, created_at) VALUES (%s, %s)"
+        await self.execute(user_add_query, (username, datetime.now().date()))
+
+        user_id = (await self.get_user_by_username(username))[0]
         count = len(groups)
 
         order_add_query = """
@@ -130,7 +137,9 @@ class Database:
                 (order_id, product_id)
             )
 
+
     # ==================== ORDER FUNCTIONS ====================
+
 
     async def add_order(self, user_id, product_id, cost, resolution):
         query = """
@@ -144,6 +153,7 @@ class Database:
             "INSERT INTO orders_product(order_id, product_id) VALUES (%s, %s)",
             (order_id, product_id)
         )
+
 
     async def get_user_paid_orders(self, user_id, resolution=None):
         """Foydalanuvchining to'langan buyurtmalarini olish"""
@@ -166,6 +176,7 @@ class Database:
             """
             return await self.execute(query, (user_id,), fetchall=True)
 
+
     async def get_user_order(self, user_id, product_id, resolution):
         """Foydalanuvchi ma'lum filmni ma'lum resolutsionda sotib olganmi?"""
         query = """
@@ -174,7 +185,26 @@ class Database:
             WHERE o.user_id = %s AND op.product_id = %s AND o.resolution = %s AND o.is_paid = True
             LIMIT 1
         """
-        return await self.execute(query, (user_id, product_id, resolution), fetchone=True)
+        res = await self.execute(query, (user_id, product_id, resolution), fetchone=True)
+        if res:
+            return res
+        else:
+            return None
+
+
+    async def get_user_purchased_products(self, user_id, resolution):
+        """Foydalanuvchi ma'lum resolution'da sotib olgan filmlar"""
+        query = """
+                SELECT DISTINCT p.id, p.title
+                FROM products p
+                         JOIN orders_product op ON p.id = op.product_id
+                         JOIN orders o ON op.order_id = o.id
+                WHERE o.user_id = %s \
+                  AND o.resolution = %s \
+                  AND o.is_paid = True \
+                """
+        return await self.execute(query, (user_id, resolution), fetchall=True)
+
 
     async def get_unpurchased_products(self, user_id, resolution):
         """Foydalanuvchi sotib olmagan filmlar (ma'lum resolution uchun)"""
