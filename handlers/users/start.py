@@ -24,6 +24,7 @@ async def admin_start(message: types.Message, state: FSMContext):
 @dp.message(CommandStart())
 async def user_start(message: types.Message, state: FSMContext):
     user_status = await db.is_started(message.from_user.id)
+    vidio_data = await db.get_videos()
     if not user_status:
         await db.add_bot_start(
             message.from_user.id,
@@ -33,6 +34,8 @@ async def user_start(message: types.Message, state: FSMContext):
     username = message.from_user.username
     user_rows = await db.get_user_by_tg_id(message.from_user.id)
     user_data_from_tg_id = user_rows[0] if user_rows else None
+    video_url = vidio_data[1]
+    video_desc = vidio_data[2]
 
     if username:
         if not username.startswith("@"):
@@ -42,6 +45,7 @@ async def user_start(message: types.Message, state: FSMContext):
         if user_data_from_username:
             if user_data_from_username[2]:
                 await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
+                await message.answer_video(video_url, caption=video_desc)
             else:
                 await db.update_user(tg_id=message.from_user.id, fullname=message.from_user.full_name, username=username)
                 await message.answer(
@@ -50,15 +54,18 @@ async def user_start(message: types.Message, state: FSMContext):
                     "Kerakli bo'limni tanlang 😊\n",
                     reply_markup=user_buttons
                 )
+                await message.answer_video(video_url, caption=video_desc)
         elif user_data_from_tg_id:
             if user_data_from_tg_id[2]:
                 await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
+                await message.answer_video(video_url, caption=video_desc)
             else:
                 await db.update_user_by_tg_id(tg_id=message.from_user.id, fullname=message.from_user.full_name, username=username)
                 await message.answer(
                     text="Kerakli bo'limni tanlang 😊",
                     reply_markup=user_buttons
                 )
+                await message.answer_video(video_url, caption=video_desc)
         else:
             await db.add_user(tg_id=message.from_user.id, fullname=message.from_user.full_name, username=username)
             await message.answer(
@@ -67,9 +74,11 @@ async def user_start(message: types.Message, state: FSMContext):
                      "Kerakli bo'limni tanlang 😊\n",
                 reply_markup=user_buttons
             )
+            await message.answer_video(video_url, caption=video_desc)
     else:
         if user_data_from_tg_id:
             await message.answer("Kerakli bo'limni tanlang 😊", reply_markup=user_buttons)
+            await message.answer_video(video_url, caption=video_desc)
             return
         await db.add_user(tg_id=message.from_user.id, fullname=message.from_user.full_name)
         await message.answer(
@@ -78,3 +87,4 @@ async def user_start(message: types.Message, state: FSMContext):
                  "Kerakli bo'limni tanlang 😊\n",
             reply_markup=user_buttons
         )
+        await message.answer_video(video_url, caption=video_desc)
