@@ -34,8 +34,8 @@ async def user_start(message: types.Message, state: FSMContext):
     username = message.from_user.username
     user_rows = await db.get_user_by_tg_id(message.from_user.id)
     user_data_from_tg_id = user_rows[0] if user_rows else None
-    video_url = vidio_data[1]
-    video_desc = vidio_data[2]
+    video_url = vidio_data[0][1]
+    video_desc = vidio_data[0][2]
 
     if username:
         if not username.startswith("@"):
