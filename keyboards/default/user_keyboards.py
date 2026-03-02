@@ -7,7 +7,7 @@ user_buttons = ReplyKeyboardBuilder(
         [
             KeyboardButton(text="🎬 Filmlar bo'limi"),
             KeyboardButton(text="🎞 Mening Filmlarim"),
-            KeyboardButton(text="🎥 Tekin filmlar"),
+            KeyboardButton(text="🎥 Bepul Filmlar"),
             KeyboardButton(text="👤 Admin bilan bog'lanish"),
         ]
     ]

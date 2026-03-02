@@ -7,7 +7,7 @@ from keyboards.inline import group_link_button
 from loader import db, dp
 
 
-@dp.message(lambda msg: msg.text == "🎥 Tekin filmlar")
+@dp.message(lambda msg: msg.text == "🎥 Bepul Filmlar")
 async def send_bonus_films(msg: Message, state: FSMContext):
     await msg.answer("🎥 Ko‘rmoqchi bo‘lgan bonus filmingizni tanlang:", reply_markup=await get_free_films())
     await state.set_state("get_free_film_id")
