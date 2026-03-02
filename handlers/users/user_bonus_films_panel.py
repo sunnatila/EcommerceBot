@@ -1,13 +1,13 @@
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 
-from keyboards.default import user_buttons, get_free_films
+from keyboards.default import get_free_films
 from keyboards.inline import group_link_button
 from loader import db, dp
 
 
-@dp.message(lambda msg: msg.text == "🎥 Bonus filmlar")
+@dp.message(lambda msg: msg.text == "🎥 Tekin filmlar")
 async def send_bonus_films(msg: Message, state: FSMContext):
     await msg.answer("🎥 Ko‘rmoqchi bo‘lgan bonus filmingizni tanlang:", reply_markup=await get_free_films())
     await state.set_state("get_free_film_id")
