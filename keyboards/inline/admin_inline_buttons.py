@@ -68,6 +68,17 @@ admin_settings_button = InlineKeyboardBuilder(
 ).adjust(2).as_markup()
 
 
+def video_settings_button(video_id):
+    return InlineKeyboardBuilder(
+        markup=[
+            [
+                InlineKeyboardButton(text="✏️Tahrirlash", callback_data=f"video_edit:{video_id}"),
+                InlineKeyboardButton(text="🗑️ O'chirish", callback_data=f"video_delete:{video_id}"),
+            ]
+        ]
+    ).adjust(2).as_markup()
+
+
 product_paid_button = InlineKeyboardBuilder(
     markup=[
         [

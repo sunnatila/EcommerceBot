@@ -11,7 +11,7 @@ class User(models.Model):
 
 
     def __str__(self):
-        return f"{self.pk} - {self.fullname}"
+        return f"{self.pk} - {str(self.fullname)[:50]}"
 
     class Meta:
         db_table = 'users'
@@ -51,7 +51,7 @@ class BotStartUser(models.Model):
 
 
     def __str__(self):
-        return f"{self.pk} - {self.fullname}"
+        return f"{self.pk} - {str(self.fullname)[:50]}"
 
 
 
