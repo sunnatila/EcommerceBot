@@ -79,6 +79,22 @@ def video_settings_button(video_id):
     ).adjust(2).as_markup()
 
 
+_film_edit_builder = InlineKeyboardBuilder()
+_film_edit_builder.button(text="🔄 To'liq tahrirlash", callback_data="edit_full")
+_film_edit_builder.button(text="🎬 Nomi", callback_data="edit_title")
+_film_edit_builder.button(text="📝 Tavsif", callback_data="edit_description")
+_film_edit_builder.button(text="📺 1080p narxi", callback_data="edit_price_1080p")
+_film_edit_builder.button(text="🔗 1080p link", callback_data="edit_group_url_1080p")
+_film_edit_builder.button(text="📺 4K narxi", callback_data="edit_price_4k")
+_film_edit_builder.button(text="🔗 4K link", callback_data="edit_group_url_4k")
+_film_edit_builder.button(text="🎥 Video", callback_data="edit_video_url")
+_film_edit_builder.button(text="⚙️ Holat", callback_data="edit_is_active")
+_film_edit_builder.button(text="🔢 Tartib", callback_data="edit_position")
+_film_edit_builder.button(text="🔙 Ortga", callback_data="edit_back")
+_film_edit_builder.adjust(1, 2, 2, 2, 2, 1, 1)
+film_edit_fields_button = _film_edit_builder.as_markup()
+
+
 product_paid_button = InlineKeyboardBuilder(
     markup=[
         [

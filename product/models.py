@@ -16,15 +16,16 @@ class Product(models.Model):
     description = models.TextField()
     video_url = models.CharField(max_length=500)
 
-    # 1080p uchun
+
     price_1080p = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     group_url_1080p = models.URLField(blank=True, null=True)
 
-    # 4K uchun
+
     price_4k = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     group_url_4k = models.URLField(blank=True, null=True)
 
     is_active = models.CharField(max_length=50, choices=PRODUCT_STATUS, default="not_active")
+    position = models.IntegerField(default=0)
     created_at = models.DateField(auto_now=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 

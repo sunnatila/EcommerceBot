@@ -16,4 +16,9 @@ class GroupStates(StatesGroup):
 
     film_status = State()
     film_video = State()
+    film_position = State()
     film_save = State()
+
+    # Bitta field'ni tahrirlash uchun
+    edit_field_choice = State()
+    edit_single_value = State()

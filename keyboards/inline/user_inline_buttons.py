@@ -20,13 +20,14 @@ def get_payment_buttons(product_id, resolution, price):
     """To'lov usullarini tanlash - callback_data ichida barcha ma'lumotlar"""
     return InlineKeyboardBuilder(
         markup=[
+            # ====== FROZEN: Click va PayMe vaqtinchalik o'chirilgan ======
+            # [
+            #     # pay_{method}_{product_id}_{resolution}_{price}
+            #     InlineKeyboardButton(text="💳 Click", callback_data=f"pay_click_{product_id}_{resolution}_{price}"),
+            #     InlineKeyboardButton(text="💳 PayMe", callback_data=f"pay_payme_{product_id}_{resolution}_{price}"),
+            # ],
             [
-                # pay_{method}_{product_id}_{resolution}_{price}
-                InlineKeyboardButton(text="💳 Click", callback_data=f"pay_click_{product_id}_{resolution}_{price}"),
-                InlineKeyboardButton(text="💳 PayMe", callback_data=f"pay_payme_{product_id}_{resolution}_{price}"),
-            ],
-            [
-                InlineKeyboardButton(text="Boshqa to'lov usuli", callback_data=f"pay_other_{product_id}_{resolution}_{price}"),
+                InlineKeyboardButton(text="To'lov qilish", callback_data=f"pay_other_{product_id}_{resolution}_{price}"),
             ]
         ]
     ).as_markup()
@@ -48,13 +49,14 @@ def get_all_payment_buttons(products_str, resolution, price):
     """Hamma filmlar uchun to'lov usullari"""
     return InlineKeyboardBuilder(
         markup=[
+            # ====== FROZEN: Click va PayMe vaqtinchalik o'chirilgan ======
+            # [
+            #     # allpay_{method}_{products_str}_{resolution}_{price}
+            #     InlineKeyboardButton(text="💳 Click", callback_data=f"allpay_click_{products_str}_{resolution}_{price}"),
+            #     InlineKeyboardButton(text="💳 PayMe", callback_data=f"allpay_payme_{products_str}_{resolution}_{price}"),
+            # ],
             [
-                # allpay_{method}_{products_str}_{resolution}_{price}
-                InlineKeyboardButton(text="💳 Click", callback_data=f"allpay_click_{products_str}_{resolution}_{price}"),
-                InlineKeyboardButton(text="💳 PayMe", callback_data=f"allpay_payme_{products_str}_{resolution}_{price}"),
-            ],
-            [
-                InlineKeyboardButton(text="Boshqa to'lov usuli", callback_data=f"allpay_other_{products_str}_{resolution}_{price}"),
+                InlineKeyboardButton(text="To'lov qilish", callback_data=f"allpay_other_{products_str}_{resolution}_{price}"),
             ]
         ]
     ).as_markup()

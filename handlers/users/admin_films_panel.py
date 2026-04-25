@@ -8,13 +8,37 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove, CallbackQuery
 
 from keyboards.inline import (film_active_button, admin_film_save_buttons, get_product_list,
-                              film_settings_button, product_paid_button)
+                              film_settings_button, product_paid_button, film_edit_fields_button)
 from .start import AdminFilter
 from keyboards.default import admin_film_buttons, admin_button
 from loader import db, dp
 from states import GroupStates
 
 LINK_REGEX = r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)|https?://t\.me/[\w\+\-]+"
+
+
+FIELD_PROMPTS = {
+    "title": "Film nomini kiriting:",
+    "description": "Film haqida ma'lumot kiriting:",
+    "price_1080p": "📺 1080p narxini kiriting (so'mda):",
+    "group_url_1080p": "📺 1080p guruh linkini kiriting:",
+    "price_4k": "📺 4K narxini kiriting (so'mda):",
+    "group_url_4k": "📺 4K guruh linkini kiriting:",
+    "video_url": "Film haqida video tashlang:",
+    "position": "🔢 Tartib raqamini kiriting (masalan: 1):",
+}
+
+FIELD_LABELS = {
+    "title": "Nomi",
+    "description": "Tavsif",
+    "price_1080p": "1080p narxi",
+    "group_url_1080p": "1080p link",
+    "price_4k": "4K narxi",
+    "group_url_4k": "4K link",
+    "video_url": "Video",
+    "is_active": "Holat",
+    "position": "Tartib",
+}
 
 
 @dp.message(AdminFilter(), lambda msg: msg.text == "🎞 Filmlar bo'limi")
@@ -43,6 +67,16 @@ async def add_group(msg: Union[types.Message, CallbackQuery], state: FSMContext,
 @dp.message(AdminFilter(), StateFilter(GroupStates.film_name), lambda msg: msg.content_type == ContentType.TEXT)
 async def get_film_name(msg: types.Message, state: FSMContext):
     await state.update_data(film_name=msg.text)
+    await msg.answer("🔢 Tartib raqamini kiriting (masalan: 1):")
+    await state.set_state(GroupStates.film_position)
+
+
+@dp.message(AdminFilter(), StateFilter(GroupStates.film_position))
+async def get_film_position(msg: types.Message, state: FSMContext):
+    if not (msg.text and msg.text.isdigit()):
+        await msg.answer("Faqat raqam kiriting! Misol: 1")
+        return
+    await state.update_data(film_position=int(msg.text))
     await msg.answer("Film haqida ma'lumot kiriting:")
     await state.set_state(GroupStates.film_description)
 
@@ -146,6 +180,7 @@ async def get_film_video(msg: types.Message, state: FSMContext):
     data = await state.get_data()
     info = "📋 <b>Film haqida ma'lumot:</b>\n\n"
     info += f"🎬 <b>Nomi:</b> {data.get('film_name')}\n"
+    info += f"🔢 <b>Tartib:</b> {data.get('film_position')}\n"
     info += f"📝 <b>Ma'lumot:</b> {data.get('film_description')}\n\n"
     info += f"📺 <b>1080p narxi:</b> {format_price(data.get('film_price_1080p'))} so'm\n"
     info += f"🔗 <b>1080p link:</b> {data.get('film_url_1080p') or 'Yo`q'}\n\n"
@@ -174,7 +209,8 @@ async def film_save(call: CallbackQuery, state: FSMContext):
                 data.get("film_price_4k"),
                 data.get("film_url_4k"),
                 data.get("film_status"),
-                data.get("film_video")
+                data.get("film_video"),
+                data.get("film_position", 0),
             )
         else:
             await db.add_product(
@@ -185,7 +221,8 @@ async def film_save(call: CallbackQuery, state: FSMContext):
                 data.get("film_price_4k"),
                 data.get("film_url_4k"),
                 data.get("film_status"),
-                data.get("film_video")
+                data.get("film_video"),
+                data.get("film_position", 0),
             )
 
         await call.message.answer("✅ Film muvaffaqiyatli saqlandi.", reply_markup=admin_film_buttons)
@@ -222,10 +259,13 @@ async def send_film_info(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
     await state.update_data(product_id=data[0])
 
-    # data: id, title, description, is_active, created_at, updated_at, video_url, 1080p url, 4k url, 1080p price, 4k price
-    video = data[6]  # video_url
+    # data: 0 id, 1 title, 2 description, 3 is_active, 4 created_at, 5 updated_at,
+    #       6 video_url, 7 group_url_1080p, 8 group_url_4k, 9 price_1080p, 10 price_4k, 11 position
+    video = data[6]
+    position = data[11] if len(data) > 11 else 0
     info = "📋 <b>Film haqida ma'lumot:</b>\n\n"
     info += f"🎬 <b>Nomi:</b> {data[1]}\n"
+    info += f"🔢 <b>Tartib:</b> {position}\n"
     info += f"📝 <b>Ma'lumot:</b> {data[2]}\n\n"
     info += f"📺 <b>1080p narxi:</b> {format_price(data[9])} so'm\n"
     info += f"🔗 <b>1080p link:</b> {data[7] or 'Yo`q'}\n\n"
@@ -239,12 +279,17 @@ async def send_film_info(call: CallbackQuery, state: FSMContext):
 
 @dp.callback_query(AdminFilter(), StateFilter("film_info"))
 async def update_group(call: CallbackQuery, state: FSMContext):
-    await call.message.delete()
     data = await state.get_data()
 
     if call.data == "edit":
-        await add_group(call, state, pr_id=data.get("product_id"))
+        await call.message.delete()
+        await call.message.answer(
+            "Qaysi maydonni tahrirlaysiz?",
+            reply_markup=film_edit_fields_button
+        )
+        await state.set_state(GroupStates.edit_field_choice)
     elif call.data == "delete":
+        await call.message.delete()
         try:
             await db.delete_product(data.get("product_id"))
             await call.message.answer("Film muvaffaqiyatli o'chirildi.", reply_markup=admin_film_buttons)
@@ -254,8 +299,90 @@ async def update_group(call: CallbackQuery, state: FSMContext):
                                       "Mijozlar sotib olishkan!!", reply_markup=admin_film_buttons)
             await state.clear()
     elif call.data == "back":
+        await call.message.delete()
         await call.message.answer("Qaysi filmni ma'lumotini ko'rmoqchisiz?", reply_markup=await get_product_list())
         await state.set_state("get_film_id")
+
+
+# ==================== FIELD-BY-FIELD EDIT ====================
+
+@dp.callback_query(AdminFilter(), StateFilter(GroupStates.edit_field_choice))
+async def edit_field_choice(call: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    product_id = data.get("product_id")
+
+    if call.data == "edit_full":
+        await call.message.delete()
+        await add_group(call, state, pr_id=product_id)
+        return
+
+    if call.data == "edit_back":
+        await call.message.delete()
+        await call.message.answer("Filmlar bo'limi.", reply_markup=admin_film_buttons)
+        await state.clear()
+        return
+
+    field = call.data.replace("edit_", "", 1)
+    await state.update_data(edit_field=field)
+    await call.message.delete()
+
+    if field == "is_active":
+        await call.message.answer("Film aktivmi?", reply_markup=film_active_button)
+    else:
+        await call.message.answer(FIELD_PROMPTS[field])
+
+    await state.set_state(GroupStates.edit_single_value)
+
+
+@dp.callback_query(AdminFilter(), StateFilter(GroupStates.edit_single_value))
+async def edit_single_value_callback(call: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    field = data.get("edit_field")
+    if field != "is_active":
+        return
+    value = call.data  # "active" yoki "not_active"
+    await db.update_product_field(data["product_id"], "is_active", value)
+    await call.message.delete()
+    await call.message.answer(
+        f"✅ {FIELD_LABELS[field]} yangilandi.",
+        reply_markup=admin_film_buttons
+    )
+    await state.clear()
+
+
+@dp.message(AdminFilter(), StateFilter(GroupStates.edit_single_value))
+async def edit_single_value_message(msg: types.Message, state: FSMContext):
+    data = await state.get_data()
+    field = data.get("edit_field")
+
+    if field == "video_url":
+        if msg.content_type != ContentType.VIDEO:
+            await msg.answer("Iltimos, video tashlang.")
+            return
+        value = msg.video.file_id
+    elif field in ("price_1080p", "price_4k", "position"):
+        if not (msg.text and msg.text.isdigit()):
+            await msg.answer("Faqat raqam kiriting!")
+            return
+        value = int(msg.text)
+    elif field in ("group_url_1080p", "group_url_4k"):
+        url = (msg.text or "").strip()
+        if not re.match(LINK_REGEX, url):
+            await msg.answer("Iltimos, to'g'ri link kiriting! Masalan: https://t.me/yourgroup")
+            return
+        value = url
+    else:  # title, description
+        if not msg.text:
+            await msg.answer("Iltimos, matn kiriting.")
+            return
+        value = msg.text
+
+    await db.update_product_field(data["product_id"], field, value)
+    await msg.answer(
+        f"✅ {FIELD_LABELS[field]} yangilandi.",
+        reply_markup=admin_film_buttons
+    )
+    await state.clear()
 
 
 def format_price(price):

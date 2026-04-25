@@ -41,32 +41,44 @@ class Database:
     # ==================== PRODUCT FUNCTIONS ====================
 
     async def add_product(self, title, description, price_1080p, group_url_1080p,
-                          price_4k, group_url_4k, is_active, video_url):
+                          price_4k, group_url_4k, is_active, video_url, position=0):
         query = """
             INSERT INTO products(title, description, video_url, price_1080p, group_url_1080p,
-                                 price_4k, group_url_4k, is_active, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                 price_4k, group_url_4k, is_active, position, created_at, updated_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         await self.execute(query, (
             title, description, video_url, price_1080p, group_url_1080p,
-            price_4k, group_url_4k, is_active, datetime.now().date(), datetime.now()
+            price_4k, group_url_4k, is_active, position, datetime.now().date(), datetime.now()
         ))
 
     async def update_product(self, product_id, title, description, price_1080p, group_url_1080p,
-                             price_4k, group_url_4k, is_active, video_url):
+                             price_4k, group_url_4k, is_active, video_url, position=0):
         query = """
             UPDATE products
             SET title=%s, description=%s, video_url=%s, price_1080p=%s, group_url_1080p=%s,
-                price_4k=%s, group_url_4k=%s, is_active=%s, updated_at=%s
+                price_4k=%s, group_url_4k=%s, is_active=%s, position=%s, updated_at=%s
             WHERE id=%s
         """
         await self.execute(query, (
             title, description, video_url, price_1080p, group_url_1080p,
-            price_4k, group_url_4k, is_active, datetime.now(), product_id
+            price_4k, group_url_4k, is_active, position, datetime.now(), product_id
         ))
 
+    async def update_product_field(self, product_id, field, value):
+        allowed = {
+            "title", "description", "video_url",
+            "price_1080p", "group_url_1080p",
+            "price_4k", "group_url_4k",
+            "is_active", "position",
+        }
+        if field not in allowed:
+            raise ValueError(f"Field '{field}' is not allowed to update")
+        query = f"UPDATE products SET {field}=%s, updated_at=%s WHERE id=%s"
+        await self.execute(query, (value, datetime.now(), product_id))
+
     async def get_products(self):
-        query = "SELECT id, title FROM products"
+        query = "SELECT id, title FROM products ORDER BY position ASC, id ASC"
         return await self.execute(query, fetchall=True)
 
     async def get_product(self, product_id):
@@ -78,11 +90,15 @@ class Database:
         return await self.execute(query, (pr_name,), fetchone=True)
 
     async def get_active_products(self):
-        query = "SELECT * FROM products WHERE is_active='active' AND (price_1080p > 0 OR price_4k > 0)"
+        query = ("SELECT * FROM products WHERE is_active='active' "
+                 "AND (price_1080p > 0 OR price_4k > 0) "
+                 "ORDER BY position ASC, id ASC")
         return await self.execute(query, fetchall=True)
 
     async def get_free_products(self):
-        query = "SELECT id, title FROM products WHERE price_1080p=0 AND price_4k=0 AND is_active='active'"
+        query = ("SELECT id, title FROM products "
+                 "WHERE price_1080p=0 AND price_4k=0 AND is_active='active' "
+                 "ORDER BY position ASC, id ASC")
         return await self.execute(query, fetchall=True)
 
     async def delete_product(self, product_id):
@@ -217,6 +233,7 @@ class Database:
                   JOIN orders o ON op.order_id = o.id
                   WHERE o.user_id = %s AND o.resolution = %s AND o.is_paid = True
               )
+            ORDER BY p.position ASC, p.id ASC
         """
         return await self.execute(query, (user_id, resolution), fetchall=True)
 

@@ -3,7 +3,7 @@ from .admin_inline_buttons import (
     get_product_list, film_settings_button,
     send_admins_buttons, admin_settings_button,
     product_paid_button, resolution_buttons_for_admin,
-    video_settings_button
+    video_settings_button, film_edit_fields_button
 )
 from .user_inline_buttons import (
     user_product_buttons, group_link_button, sent_payment_url,
