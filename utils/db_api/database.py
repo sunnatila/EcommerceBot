@@ -122,6 +122,12 @@ class Database:
         await self.execute(query, (fullname, username, tg_id))
 
 
+    async def get_users(self):
+        query = "SELECT tg_id FROM users"
+        return await self.execute(query, fetchall=True)
+
+
+
     async def get_user_by_tg_id(self, tg_id):
         query = "SELECT id, fullname, username FROM users WHERE tg_id=%s"
         return await self.execute(query, (tg_id,), fetchall=True)

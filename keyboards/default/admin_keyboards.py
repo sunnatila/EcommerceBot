@@ -19,6 +19,7 @@ admin_button = ReplyKeyboardBuilder(
 admin_video_buttons = ReplyKeyboardBuilder(
     markup=[
         [
+            KeyboardButton(text="🎥 Video yuborish"),
             KeyboardButton(text="🎞 Video qo'shish"),
             KeyboardButton(text="🎞 Videolar ro'yxati"),
             KeyboardButton(text="🔙 Ortga")
