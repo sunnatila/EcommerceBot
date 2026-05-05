@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram.enums import ContentType
 from aiogram.filters import StateFilter
 from aiogram.types import Message, CallbackQuery
@@ -65,15 +67,16 @@ async def admin_video_get(msg: Message, state: FSMContext):
 async def get_text_for_video(msg: Message, state: FSMContext):
     desc = msg.text
     data = await state.get_data()
-    video_id = data.get("video_url")
-    if video_id:
-        users_data = await db.get_users()
-        for user in users_data:
-            try:
-                await bot.send_video(chat_id=user[0], video=data['video_url'], caption=desc)
-            except:
-                pass
-    await msg.answer("Video muvaffaqiyatli tarzda foydalanuvchilarga yuborildi.", reply_markup=admin_button)
+
+    if data.get("video_url"):
+        asyncio.create_task(
+            send_video_to_users(bot, data["video_url"], desc)
+        )
+
+    await msg.answer(
+        "Video muvaffaqiyatli tarzda foydalanuvchilarga yuborildi.",
+        reply_markup=admin_button
+    )
     await state.clear()
 
 
@@ -114,3 +117,18 @@ async def video_data_panel(call: CallbackQuery, state: FSMContext):
         await db.delete_video(video_id)
         await call.message.answer("Video muvaffaqiyatli ravishda o'chirib tashlandi.", reply_markup=admin_button)
         await state.clear()
+
+
+
+async def send_video_to_users(bot, video, caption):
+    users_data = await db.get_users()
+    for user in users_data:
+        try:
+            await bot.send_video(
+                chat_id=user[0],
+                video=video,
+                caption=caption
+            )
+            await asyncio.sleep(0.05)
+        except:
+            pass
