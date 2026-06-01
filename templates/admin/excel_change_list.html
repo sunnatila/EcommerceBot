@@ -2,6 +2,13 @@
 {% load i18n %}
 
 {% block object-tools-items %}
+    {% if import_excel_url %}
+    <li>
+        <a href="{{ import_excel_url }}" class="addlink" style="background:#1F4E79;">
+            &#11014; Excel yuklash
+        </a>
+    </li>
+    {% endif %}
     {% if export_excel_url %}
     <li>
         <a href="{{ export_excel_url }}" class="addlink" style="background:#217346;">

@@ -13,3 +13,17 @@ class VideoAdmin(ExcelExportMixin, admin.ModelAdmin):
         ('Video URL', 'video_url'),
         ('Tavsif', 'video_description'),
     ]
+
+    excel_import_enabled = True
+
+    def import_excel_row(self, row):
+        # ID, Video URL, Tavsif
+        id_ = int(row[0]) if row[0] else None
+        defaults = {
+            'video_url': str(row[1] or ''),
+            'video_description': str(row[2] or ''),
+        }
+        if id_:
+            Video.objects.update_or_create(id=id_, defaults=defaults)
+        else:
+            Video.objects.create(**defaults)
