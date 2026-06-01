@@ -273,7 +273,10 @@ async def send_film_info(call: CallbackQuery, state: FSMContext):
     info += f"🔗 <b>4K link:</b> {data[8] or 'Yo`q'}\n\n"
     info += f"⚙️ <b>Holati:</b> {'✅ Aktiv' if data[3] == 'active' else '❌ Aktiv emas'}\n"
 
-    await call.message.answer_video(video=video, caption=info, reply_markup=film_settings_button)
+    if video:
+        await call.message.answer_video(video=video, caption=info, reply_markup=film_settings_button)
+    else:
+        await call.message.answer(info + "\n\n⚠️ <b>Video mavjud emas</b>", reply_markup=film_settings_button)
     await state.set_state("film_info")
 
 

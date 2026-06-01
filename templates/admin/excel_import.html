@@ -14,15 +14,15 @@
 
 <div style="max-width:560px; margin-top:20px;">
 
-    <div style="background:#fff3cd; border-left:4px solid #ffc107; padding:12px 16px; margin-bottom:16px; border-radius:0 4px 4px 0;">
-        <strong>&#9888; Import tartibi:</strong><br>
-        Ma'lumotlar bir-biriga bog'liq bo'lsa, avval <b>Foydalanuvchilar</b> va <b>Mahsulotlar</b>ni import qiling,
-        so'ngra <b>Buyurtmalar</b>ni.
+    <div style="background:#fff3cd; border-left:4px solid #e6a817; padding:12px 16px; margin-bottom:16px; border-radius:0 4px 4px 0; color:#212529;">
+        <strong style="color:#212529;">&#9888; Import tartibi:</strong><br>
+        <span style="color:#212529;">Ma'lumotlar bir-biriga bog'liq bo'lsa, avval <b>Foydalanuvchilar</b> va <b>Mahsulotlar</b>ni import qiling, so'ngra <b>Buyurtmalar</b>ni.</span>
     </div>
 
-    <div style="background:#e8f4fd; border-left:4px solid #1F4E79; padding:12px 16px; margin-bottom:24px; border-radius:0 4px 4px 0;">
-        <strong>&#8505; Eslatma:</strong> Fayl: <code>{{ excel_filename }}.xlsx</code><br>
-        Mavjud yozuvlar ID bo'yicha <b>yangilanadi</b>, yangi ID lar <b>qo'shiladi</b>.
+    <div style="background:#dceefb; border-left:4px solid #1F4E79; padding:12px 16px; margin-bottom:24px; border-radius:0 4px 4px 0; color:#212529;">
+        <strong style="color:#212529;">&#8505; Eslatma:</strong>
+        <span style="color:#212529;">Fayl: <code style="background:#c8e0f5; color:#212529; padding:1px 5px; border-radius:3px;">{{ excel_filename }}.xlsx</code><br>
+        Mavjud yozuvlar ID bo'yicha <b>yangilanadi</b>, yangi ID lar <b>qo'shiladi</b>.</span>
     </div>
 
     <form method="post" enctype="multipart/form-data">
@@ -35,7 +35,7 @@
         <div>
             <input type="submit" value="&#11014; Import qilish"
                    style="background:#1F4E79; color:#fff; padding:10px 24px; border:none; border-radius:4px; cursor:pointer; font-size:14px; font-weight:bold;">
-            <a href="../" style="margin-left:16px; color:#666; text-decoration:none;">Bekor qilish</a>
+            <a href="../" style="margin-left:16px; text-decoration:none;">Bekor qilish</a>
         </div>
     </form>
 </div>
