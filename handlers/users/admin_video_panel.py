@@ -51,16 +51,32 @@ async def get_video_text(msg: Message, state: FSMContext):
 
 @dp.message(AdminFilter(), lambda msg: msg.text == "🎥 Video yuborish")
 async def admin_video_add(msg: Message, state: FSMContext):
-    await msg.answer("Videoni tashlang.")
+    await msg.answer("Video yoki rasmni tashlang.")
     await state.set_state("get_video_url")
 
 
-@dp.message(AdminFilter(), StateFilter("get_video_url"), lambda msg: msg.content_type == ContentType.VIDEO)
+@dp.message(
+    AdminFilter(),
+    StateFilter("get_video_url"),
+    lambda msg: msg.content_type in {ContentType.VIDEO, ContentType.PHOTO},
+)
 async def admin_video_get(msg: Message, state: FSMContext):
-    video_url = msg.video.file_id
-    await state.update_data({"video_url": video_url})
-    await msg.answer("Video haqida ma'lumot kiriting:")
+    if msg.video:
+        media_id = msg.video.file_id
+        media_type = "video"
+    else:
+        # Telegram rasmning bir nechta o'lchamini beradi. Eng sifatlisini olamiz.
+        media_id = msg.photo[-1].file_id
+        media_type = "photo"
+
+    await state.update_data({"media_id": media_id, "media_type": media_type})
+    await msg.answer("Video yoki rasm haqida ma'lumot kiriting:")
     await state.set_state("get_text_for_video")
+
+
+@dp.message(AdminFilter(), StateFilter("get_video_url"))
+async def admin_media_invalid(msg: Message):
+    await msg.answer("Iltimos, faqat video yoki rasm yuboring.")
 
 
 @dp.message(AdminFilter(), StateFilter("get_text_for_video"))
@@ -68,13 +84,18 @@ async def get_text_for_video(msg: Message, state: FSMContext):
     desc = msg.text
     data = await state.get_data()
 
-    if data.get("video_url"):
+    if data.get("media_id"):
         asyncio.create_task(
-            send_video_to_users(bot, data["video_url"], desc)
+            send_media_to_users(
+                bot,
+                data["media_id"],
+                data["media_type"],
+                desc,
+            )
         )
 
     await msg.answer(
-        "Video muvaffaqiyatli tarzda foydalanuvchilarga yuborildi.",
+        "Video yoki rasm muvaffaqiyatli tarzda foydalanuvchilarga yuborildi.",
         reply_markup=admin_button
     )
     await state.clear()
@@ -120,15 +141,22 @@ async def video_data_panel(call: CallbackQuery, state: FSMContext):
 
 
 
-async def send_video_to_users(bot, video, caption):
+async def send_media_to_users(bot, media_id, media_type, caption):
     users_data = await db.get_users()
     for user in users_data:
         try:
-            await bot.send_video(
-                chat_id=user[0],
-                video=video,
-                caption=caption
-            )
+            if media_type == "photo":
+                await bot.send_photo(
+                    chat_id=user[0],
+                    photo=media_id,
+                    caption=caption,
+                )
+            else:
+                await bot.send_video(
+                    chat_id=user[0],
+                    video=media_id,
+                    caption=caption,
+                )
             await asyncio.sleep(0.05)
-        except:
+        except Exception:
             pass
